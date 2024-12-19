@@ -7,3 +7,8 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+Post.create([
+  { title: "簡単パスタ", description: "お手軽で美味しいパスタの作り方" },
+  { title: "ヘルシースムージー", description: "健康的なスムージーのレシピ" }
+])
