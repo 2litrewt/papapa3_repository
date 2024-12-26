@@ -9,7 +9,10 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   namespace :api do
-    resources :posts, only: [:index]
+    resources :recipes, only: [:index, :show]
+    resources :categories, only: [:index]
+    resources :ingredients, only: [:index]
+    resources :tags, only: [:index]
   end
 
 end
