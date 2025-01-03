@@ -1,4 +1,3 @@
-// src/app/posts/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -34,6 +33,7 @@ interface Recipe {
   description: string;
   cooking_time: number;
   price: number;
+  image?: string;
   created_at: string;
   updated_at: string;
   user: User;
@@ -48,7 +48,8 @@ const PostsPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get<Recipe[]>('http://localhost:3000/api/recipes') // バックエンドのエンドポイントURL
+    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL); // デバッグ用
+    axios.get<Recipe[]>(process.env.NEXT_PUBLIC_API_URL || '')
       .then(response => {
         setRecipes(response.data);
         setLoading(false);
@@ -74,7 +75,7 @@ const PostsPage = () => {
             <p>価格: {recipe.price}円</p>
             <p>カテゴリー: {recipe.category.name}</p>
             <p>作成者: {recipe.user.name}</p>
-            <img src={recipe.image} alt={recipe.title} className="w-64 h-auto mt-2" />
+            {recipe.image && <img src={recipe.image} alt={recipe.title} className="w-64 h-auto mt-2" />}
             <div className="mt-2">
               <h3 className="font-semibold">材料:</h3>
               <ul className="list-disc list-inside">

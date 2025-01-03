@@ -70,7 +70,7 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # 既存の設定の下に追加
-  config.hosts << "back"
+  config.hosts << "localhost"
 
 
 end

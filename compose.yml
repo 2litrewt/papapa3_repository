@@ -11,6 +11,9 @@ services:
     command: yarn dev -p 4000
     ports:
       - "4000:4000"
+    networks:
+      - app-network
+
   back:
     build:
       context: ./back
@@ -27,6 +30,9 @@ services:
       - "3000:3000"
     tty: true
     stdin_open: true
+    networks:
+      - app-network
+
   db:
     image: postgres:16.2
     environment:
@@ -37,6 +43,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
 volumes:
   front_node_modules:
   postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
