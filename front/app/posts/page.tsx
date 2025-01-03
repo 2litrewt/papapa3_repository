@@ -73,7 +73,7 @@ const PostsPage = () => {
             <p className="text-gray-700">{recipe.description}</p>
             <p>調理時間: {recipe.cooking_time}分</p>
             <p>価格: {recipe.price}円</p>
-            <p>カテゴリー: {recipe.category.name}</p>
+            <p>カテゴリ: {recipe.category.name}</p>
             <p>作成者: {recipe.user.name}</p>
             {recipe.image && <img src={recipe.image} alt={recipe.title} className="w-64 h-auto mt-2" />}
             <div className="mt-2">
