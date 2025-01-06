@@ -19,4 +19,8 @@ Rails.application.routes.draw do
     resources :tags, only: [:index]
   end
 
+    # フロントエンドが直接アクセスする場合のパスも設定
+    resources :recipes, only: [:index], controller: 'api/recipes'
 end
+
+

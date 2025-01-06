@@ -17,38 +17,24 @@ module Api
 
     # GET /api/recipes/search
     def search
-      # パラメータ取得
       keyword = params[:keyword]
       price = params[:price]
       cooking_time = params[:cooking_time]
-      
+    
       recipes = Recipe.all
       recipes = recipes.where("title LIKE ?", "%#{keyword}%") if keyword.present?
-      recipes = recipes.where("title LIKE ?", "%#{keyword}%") if keyword.present?
-      if price.present?
-        range = price_range(price)
-        Rails.logger.debug "Price range: #{range.inspect}" # デバッグ用出力
-        recipes = recipes.where(price: range)
-      end      
+      recipes = recipes.where(price: price_range(price)) if price.present?
       recipes = recipes.where("cooking_time <= ?", cooking_time.to_i) if cooking_time.present?
-
-      Rails.logger.debug "Generated SQL: #{recipes.to_sql}"
-
+    
       if recipes.exists?
         render json: recipes
       else
         render json: { error: "Recipe not found" }, status: :not_found
       end
     end
-
+    
     private
-
-    def set_recipe
-      @recipe = Recipe.find(params[:id])
-    rescue ActiveRecord::RecordNotFound
-      render json: { error: 'Recipe not found' }, status: :not_found
-    end
-
+    
     def price_range(price)
       case price
       when "low"
@@ -61,6 +47,3 @@ module Api
         nil
       end
     end
-
-  end
-end
