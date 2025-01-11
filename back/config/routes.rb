@@ -9,7 +9,8 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   namespace :api do
-    resources :recipes, only: [:index, :show] do
+    resources :posts, only: [:index] # ここに追加
+    resources :recipes, only: [:index, :show, :search] do
       collection do
         get 'search', to: 'recipes#search'
       end
@@ -21,6 +22,8 @@ Rails.application.routes.draw do
 
     # フロントエンドが直接アクセスする場合のパスも設定
     resources :recipes, only: [:index], controller: 'api/recipes'
+
+    resources :posts, only: [:index]
 end
 
 

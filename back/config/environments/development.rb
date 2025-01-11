@@ -70,7 +70,16 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # 既存の設定の下に追加
-  config.hosts << "localhost"
+  config.hosts << "back"
 
 
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins '*'
+      resource '*',
+        headers: :any,
+        methods: [:get, :post, :put, :patch, :delete, :options, :head]
+    end
+  end
+  
 end

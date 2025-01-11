@@ -6,8 +6,16 @@ module Api
 
     # GET /api/recipes
     def index
-      @recipes = ::Recipe.includes(:category, :ingredients, :tags).all
-      render json: @recipes, each_serializer: RecipeSerializer
+      if params[:keyword].present?
+        # 検索ワードでタイトルまたは説明を絞り込み
+        @recipes = Recipe.includes(:category, :user, :ingredients, :tags)
+                         .where('title ILIKE ? OR description ILIKE ?', "%#{params[:keyword]}%", "%#{params[:keyword]}%")
+      else
+        # 全てのレシピを返す
+        @recipes = Recipe.includes(:category, :user, :ingredients, :tags).all
+      end
+  
+      render json: @recipes
     end
 
     # GET /api/recipes/:id
@@ -32,9 +40,9 @@ module Api
         render json: { error: "Recipe not found" }, status: :not_found
       end
     end
-    
+
     private
-    
+
     def price_range(price)
       case price
       when "low"
@@ -47,6 +55,11 @@ module Api
         nil
       end
     end
+
+    def set_recipe
+      @recipe = Recipe.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: 'Recipe not found' }, status: :not_found
+    end
   end
 end
-
