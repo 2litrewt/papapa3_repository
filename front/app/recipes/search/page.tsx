@@ -1,11 +1,21 @@
+'use client';
+
 import React from 'react';
-import SearchForm from '@/components/SearchForm'; 
+import { useRouter } from 'next/navigation';
+import SearchForm from '@/components/SearchForm';
 
 const SearchPage = () => {
+  const router = useRouter();
+
+  const handleSearch = (query: string) => {
+    // 検索結果ページに遷移
+    router.push(`/posts?keyword=${encodeURIComponent(query)}`);
+  };
+
   return (
     <div>
       <h1>レシピ検索</h1>
-      <SearchForm />
+      <SearchForm onSearch={handleSearch} />
     </div>
   );
 };

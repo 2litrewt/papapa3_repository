@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3000/api/:path*', // バックエンドのURL
+        destination: 'http://back:3000/api/:path*',
       },
     ];
   },
