@@ -36,8 +36,8 @@ module Api
           created_at: recipe.created_at,
           updated_at: recipe.updated_at,
           ingredients: recipe.ingredients.pluck(:name), # 材料名のリストを取得
-          tags: recipe.tags.pluck(:name) # タグ名のリストを取得
-
+          tags: recipe.tags.pluck(:name), # タグ名のリストを取得
+          steps: recipe.steps.map { |step| { step_number: step.step_number, instruction: step.instruction } }
         }, status: :ok
       else
         render json: { error: 'Recipe not found' }, status: :not_found
