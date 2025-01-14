@@ -36,6 +36,14 @@ module App
     # Set locale
     config.i18n.default_locale = :ja
     config.i18n.available_locales = [:en, :ja]
+
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins '*' # 必要に応じて特定のオリジンに制限
+        resource '*', headers: :any, methods: [:get, :post, :patch, :put, :delete, :options, :head]
+      end
+    end
+    
           
   end
 end
