@@ -49,14 +49,33 @@ module Api
       keyword = params[:keyword]
       price = params[:price]
       cooking_time = params[:cooking_time]
-    
-      recipes = Recipe.all
+      nutrition_value = params[:nutrition_value].to_i
+
+      # ベースクエリ
+      recipes = Recipe.includes(:ingredients, :recipe_ingredients)
+
       recipes = recipes.where("title LIKE ?", "%#{keyword}%") if keyword.present?
       recipes = recipes.where(price: price_range(price)) if price.present?
       recipes = recipes.where("cooking_time <= ?", cooking_time.to_i) if cooking_time.present?
     
-      if recipes.exists?
-        render json: recipes
+      if nutrition_value.positive?
+        recipes = recipes.select do |recipe|
+          # 栄養価を計算
+          total_nutrition = recipe.ingredients.sum do |ingredient|
+            recipe_ingredient = recipe.recipe_ingredients.find_by(ingredient_id: ingredient.id)
+            next 0 unless recipe_ingredient
+    
+            (ingredient.protein + ingredient.carbohydrate + ingredient.fat) * recipe_ingredient.quantity
+          end
+    
+          # 条件に合致するかチェック
+          total_nutrition > nutrition_value
+        end
+      end
+    
+      # 結果を返す
+      if recipes.any?
+        render json: recipes, status: :ok
       else
         render json: { error: "Recipe not found" }, status: :not_found
       end

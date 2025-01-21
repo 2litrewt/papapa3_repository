@@ -7,9 +7,16 @@ import SearchForm from '@/components/SearchForm';
 const SearchPage = () => {
   const router = useRouter();
 
-  const handleSearch = (query: string) => {
-    // 検索結果ページに遷移
-    router.push(`/posts?keyword=${encodeURIComponent(query)}`);
+  const handleSearch = (query: { keyword: string; sortBy: string; order: string }) => {
+    const { keyword, sortBy, order } = query;
+
+    // クエリパラメータを生成して /posts に遷移
+    const searchParams = new URLSearchParams();
+    if (keyword) searchParams.append('keyword', keyword);
+    if (sortBy) searchParams.append('sortBy', sortBy);
+    if (order) searchParams.append('order', order);
+
+    router.push(`/posts?${searchParams.toString()}`);
   };
 
   return (
