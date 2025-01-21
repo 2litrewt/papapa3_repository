@@ -6,16 +6,22 @@ module Api
 
     # GET /api/recipes
     def index
-      if params[:keyword].present?
-        # 検索ワードでタイトルまたは説明を絞り込み
-        @recipes = Recipe.includes(:category, :user, :ingredients, :tags)
-                         .where('title ILIKE ? OR description ILIKE ?', "%#{params[:keyword]}%", "%#{params[:keyword]}%")
-      else
-        # 全てのレシピを返す
-        @recipes = Recipe.includes(:category, :user, :ingredients, :tags).all
+      keyword = params[:keyword]
+      sort_by = params[:sortBy] || 'created_at' # デフォルトのソート項目
+      order = params[:order] || 'asc'          # デフォルトのソート順
+    
+      # ベースクエリ
+      recipes = Recipe.includes(:category, :user, :ingredients, :tags)
+    
+      # キーワード検索
+      recipes = recipes.where('title ILIKE ? OR description ILIKE ?', "%#{keyword}%", "%#{keyword}%") if keyword.present?
+    
+      # ソート処理
+      if %w[price cooking_time created_at].include?(sort_by) && %w[asc desc].include?(order)
+        recipes = recipes.order("#{sort_by} #{order}")
       end
-  
-      render json: @recipes
+    
+      render json: recipes
     end
 
     def show
