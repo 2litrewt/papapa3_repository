@@ -8,12 +8,17 @@ interface Recipe {
   id: number;
   title: string;
   description: string;
+  cooking_time: number;
+  price: number;
 }
 
 const PostsPage = () => {
   const searchParams = useSearchParams();
   const keyword = searchParams.get('keyword') || '';
-  const [results, setResults] = useState<Recipe[]>([]);
+  const sortBy = searchParams.get('sortBy') || 'created_at'; // ソート項目のデフォルト
+  const order = searchParams.get('order') || 'asc'; // ソート順のデフォルト
+
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,19 +26,21 @@ const PostsPage = () => {
     const fetchRecipes = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/recipes?keyword=${encodeURIComponent(keyword)}`);
-        setResults(response.data);
+
+        // API リクエストを送信
+        const response = await axios.get('/api/recipes', {
+          params: { keyword, sortBy, order },
+        });
+        setRecipes(response.data); // 結果をステートに保存
       } catch (err: any) {
-        setError(err.message || 'Error fetching recipes');
+        setError(err.message || 'エラーが発生しました');
       } finally {
         setLoading(false);
       }
     };
 
-    if (keyword) {
-      fetchRecipes();
-    }
-  }, [keyword]);
+    fetchRecipes();
+  }, [keyword, sortBy, order]); // 検索条件が変わるたびに再リクエスト
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -41,12 +48,14 @@ const PostsPage = () => {
   return (
     <div>
       <h1>投稿一覧</h1>
-      {results.length > 0 ? (
+      {recipes.length > 0 ? (
         <ul>
-          {results.map((recipe) => (
-            <li key={recipe.id}>
+          {recipes.map((recipe) => (
+            <li key={recipe.id} style={{ marginBottom: '20px', border: '1px solid #ddd', padding: '10px' }}>
               <h2>{recipe.title}</h2>
               <p>{recipe.description}</p>
+              <p>調理時間: {recipe.cooking_time} 分</p>
+              <p>価格: {recipe.price} 円</p>
             </li>
           ))}
         </ul>
