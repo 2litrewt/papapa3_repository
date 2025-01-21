@@ -18,11 +18,32 @@ module Api
       render json: @recipes
     end
 
-    # GET /api/recipes/:id
     def show
-      render json: @recipe, serializer: RecipeSerializer
+      recipe = Recipe.includes(:ingredients, :tags).find_by(id: params[:id])
+      
+      if recipe
+        render json: {
+          id: recipe.id,
+          title: recipe.title,
+          description: recipe.description,
+          cooking_time: recipe.cooking_time,
+          price: recipe.price,
+          category_id: recipe.category_id,
+          category_name: recipe.category.name, # カテゴリ名を追加（オプション）
+          image_url: recipe.image, # 必要に応じてURL形式に加工
+          user_id: recipe.user_id,
+          user_name: recipe.user.name, # ユーザー名を追加（オプション）
+          created_at: recipe.created_at,
+          updated_at: recipe.updated_at,
+          ingredients: recipe.ingredients.pluck(:name), # 材料名のリストを取得
+          tags: recipe.tags.pluck(:name), # タグ名のリストを取得
+          steps: recipe.steps.map { |step| { step_number: step.step_number, instruction: step.instruction } }
+        }, status: :ok
+      else
+        render json: { error: 'Recipe not found' }, status: :not_found
+      end
     end
-
+    
     # GET /api/recipes/search
     def search
       keyword = params[:keyword]

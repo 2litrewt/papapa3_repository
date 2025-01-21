@@ -10,6 +10,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :posts, only: [:index] # ここに追加
+    
     resources :recipes, only: [:index, :show, :search] do
       collection do
         get 'search', to: 'recipes#search'

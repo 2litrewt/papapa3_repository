@@ -5,6 +5,7 @@ class Recipe < ApplicationRecord
   has_many :ingredients, through: :recipe_ingredients
   has_many :recipe_tags, dependent: :destroy
   has_many :tags, through: :recipe_tags
+  has_many :steps, -> { order(:step_number) }, dependent: :destroy
 
   validates :title, presence: true
   validates :description, presence: true
