@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import Link from 'next/link'; // Linkをインポート
 
 interface Recipe {
   id: number;
@@ -45,7 +46,9 @@ const PostsPage = () => {
         <ul>
           {results.map((recipe) => (
             <li key={recipe.id}>
-              <h2>{recipe.title}</h2>
+              <Link href={`/recipes/${recipe.id}`}> {/* レシピ詳細ページへのリンク */}
+                <h2>{recipe.title}</h2>
+              </Link>
               <p>{recipe.description}</p>
             </li>
           ))}
