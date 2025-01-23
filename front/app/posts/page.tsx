@@ -1,8 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import Link from 'next/link';
+
+interface TotalNutrition {
+  protein: number;
+  carbohydrate: number;
+  fat: number;
+}
 
 interface Recipe {
   id: number;
@@ -10,14 +16,10 @@ interface Recipe {
   description: string;
   cooking_time: number;
   price: number;
+  total_nutrition: TotalNutrition; // 合計栄養素
 }
 
 const PostsPage = () => {
-  const searchParams = useSearchParams();
-  const keyword = searchParams.get('keyword') || '';
-  const sortBy = searchParams.get('sortBy') || 'created_at'; // ソート項目のデフォルト
-  const order = searchParams.get('order') || 'asc'; // ソート順のデフォルト
-
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,12 +28,8 @@ const PostsPage = () => {
     const fetchRecipes = async () => {
       try {
         setLoading(true);
-
-        // API リクエストを送信
-        const response = await axios.get('/api/recipes', {
-          params: { keyword, sortBy, order },
-        });
-        setRecipes(response.data); // 結果をステートに保存
+        const response = await axios.get('/api/recipes');
+        setRecipes(response.data); // 結果を保存
       } catch (err: any) {
         setError(err.message || 'エラーが発生しました');
       } finally {
@@ -40,28 +38,34 @@ const PostsPage = () => {
     };
 
     fetchRecipes();
-  }, [keyword, sortBy, order]); // 検索条件が変わるたびに再リクエスト
+  }, []);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div>
-      <h1>投稿一覧</h1>
-      {recipes.length > 0 ? (
-        <ul>
-          {recipes.map((recipe) => (
-            <li key={recipe.id} style={{ marginBottom: '20px', border: '1px solid #ddd', padding: '10px' }}>
-              <h2>{recipe.title}</h2>
-              <p>{recipe.description}</p>
-              <p>調理時間: {recipe.cooking_time} 分</p>
-              <p>価格: {recipe.price} 円</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>該当するレシピがありません。</p>
-      )}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">投稿一覧</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {recipes.map((recipe) => (
+          <div
+            key={recipe.id}
+            className="border rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow"
+          >
+            <Link href={`/recipes/${recipe.id}`}>
+              <h2 className="text-lg font-semibold text-blue-600 hover:underline">
+                {recipe.title}
+              </h2>
+            </Link>
+            <p className="text-sm text-gray-500">調理時間: {recipe.cooking_time} 分</p>
+            <p className="text-sm text-gray-500">価格: {recipe.price} 円</p>
+            <h3 className="font-bold mt-4">栄養素</h3>
+            <p>タンパク質: {recipe.total_nutrition.protein}g</p>
+            <p>炭水化物: {recipe.total_nutrition.carbohydrate}g</p>
+            <p>脂質: {recipe.total_nutrition.fat}g</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
