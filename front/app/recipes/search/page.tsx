@@ -7,16 +7,29 @@ import SearchForm from '@/components/SearchForm';
 const SearchPage = () => {
   const router = useRouter();
 
-  const handleSearch = (query: { keyword: string; sortBy: string; order: string }) => {
-    const { keyword, sortBy, order } = query;
-
-    // クエリパラメータを生成して /posts に遷移
+  const handleSearch = (query: {
+    keyword?: string;
+    sortBy?: string;
+    order?: string;
+    cooking_time?: string;
+    price_range?: string;
+    nutrition_type?: string;
+  }) => {
     const searchParams = new URLSearchParams();
-    if (keyword) searchParams.append('keyword', keyword);
-    if (sortBy) searchParams.append('sortBy', sortBy);
-    if (order) searchParams.append('order', order);
+    if (query.keyword) searchParams.append('keyword', query.keyword);
+    if (query.sortBy) searchParams.append('sortBy', query.sortBy);
+    if (query.order) searchParams.append('order', query.order);
+    if (query.cooking_time) searchParams.append('cooking_time', query.cooking_time);
+    if (query.price_range) searchParams.append('price_range', query.price_range);
+    if (query.nutrition_type) searchParams.append('nutrition_type', query.nutrition_type);
 
-    router.push(`/posts?${searchParams.toString()}`);
+    console.log('生成されたクエリ:', searchParams.toString()); // デバッグ用
+
+    try {
+      router.push(`/posts?${searchParams.toString()}`);
+    } catch (error) {
+      console.error('検索クエリ生成中にエラー:', error);
+    }
   };
 
   return (

@@ -7,44 +7,87 @@ module Api
     # GET /api/recipes
     def index
       keyword = params[:keyword]
-      sort_by = params[:sortBy] || 'created_at' # デフォルトのソート項目
-      order = params[:order] || 'asc'          # デフォルトのソート順
+      cooking_time = params[:cooking_time] # 調理時間
+      price_range = params[:price_range]  # 価格帯
+      nutrition_type = params[:nutrition_type] # 栄養タイプ
+      sort_by = params[:sortBy] || 'created_at' # ソート項目
+      order = params[:order] || 'asc'          # 昇降順
     
       # ベースクエリ
-      recipes = Recipe.includes(:category, :user, :ingredients, :tags)
+      recipes = Recipe.includes(:ingredients)
     
       # キーワード検索
-      recipes = recipes.where('title ILIKE ? OR description ILIKE ?', "%#{keyword}%", "%#{keyword}%") if keyword.present?
+      if keyword.present?
+        recipes = recipes.where('title ILIKE ? OR description ILIKE ?', "%#{keyword}%", "%#{keyword}%")
+      end
+    
+      # 調理時間の条件
+      if cooking_time.present?
+        case cooking_time
+        when 'short'
+          recipes = recipes.where('cooking_time <= ?', 30)
+        when 'medium'
+          recipes = recipes.where('cooking_time > ? AND cooking_time <= ?', 30, 60)
+        when 'long'
+          recipes = recipes.where('cooking_time > ?', 60)
+        end
+      end
+    
+      # 価格帯の条件
+      if price_range.present?
+        case price_range
+        when 'low'
+          recipes = recipes.where('price <= ?', 500)
+        when 'medium'
+          recipes = recipes.where('price > ? AND price <= ?', 500, 1000)
+        when 'high'
+          recipes = recipes.where('price > ?', 1000)
+        end
+      end
+    
+      # 栄養タイプの条件
+      if nutrition_type.present?
+        case nutrition_type
+        when 'low_calorie'
+          recipes = recipes.where('total_nutrition_calories <= ?', 300)
+        when 'high_protein'
+          recipes = recipes.where('total_nutrition_protein >= ?', 20)
+        when 'low_carb'
+          recipes = recipes.where('total_nutrition_carbohydrate <= ?', 50)
+        when 'low_fat'
+          recipes = recipes.where('total_nutrition_fat <= ?', 10)
+        end
+      end
     
       # ソート処理
       if %w[price cooking_time created_at].include?(sort_by) && %w[asc desc].include?(order)
         recipes = recipes.order("#{sort_by} #{order}")
       end
     
+      # レスポンス
       render json: recipes
     end
-
+    
+    
     def show
-      recipe = Recipe.includes(:ingredients, :tags).find_by(id: params[:id])
-      
+      recipe = Recipe.includes(:ingredients, :category, :user, :steps).find_by(id: params[:id])
+    
       if recipe
-        render json: {
-          id: recipe.id,
-          title: recipe.title,
-          description: recipe.description,
-          cooking_time: recipe.cooking_time,
-          price: recipe.price,
-          category_id: recipe.category_id,
-          category_name: recipe.category.name, # カテゴリ名を追加（オプション）
-          image_url: recipe.image, # 必要に応じてURL形式に加工
-          user_id: recipe.user_id,
-          user_name: recipe.user.name, # ユーザー名を追加（オプション）
-          created_at: recipe.created_at,
-          updated_at: recipe.updated_at,
-          ingredients: recipe.ingredients.pluck(:name), # 材料名のリストを取得
-          tags: recipe.tags.pluck(:name), # タグ名のリストを取得
+        total_protein = recipe.ingredients.sum { |ingredient| ingredient.protein }
+        total_carbohydrate = recipe.ingredients.sum { |ingredient| ingredient.carbohydrate }
+        total_fat = recipe.ingredients.sum { |ingredient| ingredient.fat }
+    
+        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :price]).merge({
+          category_name: recipe.category&.name,
+          user_name: recipe.user&.name,
+          total_nutrition: {
+            protein: total_protein,
+            carbohydrate: total_carbohydrate,
+            fat: total_fat
+          },
+          ingredients: recipe.ingredients.pluck(:name),
           steps: recipe.steps.map { |step| { step_number: step.step_number, instruction: step.instruction } }
-        }, status: :ok
+        })
       else
         render json: { error: 'Recipe not found' }, status: :not_found
       end
