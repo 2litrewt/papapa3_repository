@@ -103,17 +103,17 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       </select>
 
       {/* 栄養タイプ */}
-      <select
+            <select
         value={nutritionType}
         onChange={(e) => setNutritionType(e.target.value)}
         style={{ padding: '8px', fontSize: '16px', width: '100%' }}
       >
         <option value="">栄養タイプを選択</option>
-        <option value="low_calorie">低カロリー</option>
         <option value="high_protein">高タンパク</option>
         <option value="low_carb">低糖質</option>
         <option value="low_fat">低脂質</option>
       </select>
+
 
       {/* 検索ボタン */}
       <button type="submit" style={{ padding: '10px', fontSize: '16px' }}>
