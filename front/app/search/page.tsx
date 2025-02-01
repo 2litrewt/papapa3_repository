@@ -1,6 +1,6 @@
-import Link from "'next/link'"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Heart, Bookmark, Clock, DollarSign, Apple } from "'lucide-react'"
+import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react"
 
 async function searchRecipes(params: { 
   query?: string, 

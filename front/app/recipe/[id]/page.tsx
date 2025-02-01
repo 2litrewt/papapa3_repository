@@ -1,12 +1,12 @@
-"'use client'"
+"use client"
 
-import { useState } from "'react'"
-import Link from "'next/link'"
-import { useRouter } from "'next/navigation'"
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Heart, Bookmark, Clock, DollarSign, Apple } from "'lucide-react'"
+import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react"
 
 async function getRecipe(id: string) {
   // This is a mock function. In a real application, you would call an API here.
