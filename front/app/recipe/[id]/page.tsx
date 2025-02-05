@@ -1,22 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation"; // 🔹 useParams を追加
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
 
-export default function RecipeDetail({ params }: { params: { id: string } }) {
+export default function RecipeDetail() {
   const [recipe, setRecipe] = useState<any>(null);
   const router = useRouter();
+  const params = useParams(); // 🔹 useParams で id を取得
+  const recipeId = params?.id as string; // 🔹 型安全のため `as string` を追加
 
   useEffect(() => {
+    if (!recipeId) return; // 🔹 `id` が未定義の場合は処理しない
     fetchRecipe();
-  }, [params.id]);
+  }, [recipeId]);
 
   const fetchRecipe = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipes/${params.id}`);
+      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
       setRecipe(response.data);
     } catch (error) {
       console.error("Error fetching recipe:", error);
