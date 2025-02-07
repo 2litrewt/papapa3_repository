@@ -1,81 +1,117 @@
 module Api
   class RecipesController < ApplicationController
-
-    # JSON形式でレスポンスを返すための設定
-    before_action :set_recipe, only: [:show]
-
     # GET /api/recipes
     def index
-      if params[:keyword].present?
-        # 検索ワードでタイトルまたは説明を絞り込み
-        @recipes = Recipe.includes(:category, :user, :ingredients, :tags)
-                         .where('title ILIKE ? OR description ILIKE ?', "%#{params[:keyword]}%", "%#{params[:keyword]}%")
-      else
-        # 全てのレシピを返す
-        @recipes = Recipe.includes(:category, :user, :ingredients, :tags).all
+      keyword = params[:keyword]
+      cooking_time = params[:cooking_time] # 調理時間
+      price_range = params[:price_range]  # 価格帯
+      nutrition_type = params[:nutrition_type] # 栄養タイプ
+      sort_by = params[:sortBy] || 'created_at' # ソート項目
+      order = params[:order] || 'asc' # 昇降順
+
+      # ベースクエリ
+      recipes = Recipe.includes(:ingredients)
+
+      # キーワード検索
+      if keyword.present?
+        recipes = recipes.where('title ILIKE ? OR description ILIKE ?', "%#{keyword}%", "%#{keyword}%")
       end
-  
-      render json: @recipes
+
+      # 価格帯の条件
+      if price_range.present?
+        case price_range
+        when 'low'
+          recipes = recipes.where('price <= ?', 500)
+        when 'medium'
+          recipes = recipes.where('price > ? AND price <= ?', 500, 1000)
+        when 'high'
+          recipes = recipes.where('price > ?', 1000)
+        end
+      end
+
+      # 調理時間の条件
+      if cooking_time.present?
+        case cooking_time
+        when 'short'
+          recipes = recipes.where('cooking_time <= ?', 30)
+        when 'medium'
+          recipes = recipes.where('cooking_time > ? AND cooking_time <= ?', 30, 60)
+        when 'long'
+          recipes = recipes.where('cooking_time > ?', 60)
+        end
+      end
+
+      # 栄養タイプの条件（Ruby側で並び替え）
+      if nutrition_type.present?
+        recipes = recipes.sort_by do |recipe|
+          total_protein = recipe.ingredients.sum(&:protein).to_f
+          total_carbohydrate = recipe.ingredients.sum(&:carbohydrate).to_f
+          total_fat = recipe.ingredients.sum(&:fat).to_f
+
+          Rails.logger.info "Recipe ID: #{recipe.id}, Protein: #{total_protein}, Carbohydrate: #{total_carbohydrate}, Fat: #{total_fat}"
+
+          case nutrition_type
+          when 'high_protein'
+            -total_protein # 多い順（降順）
+          when 'low_carb'
+            total_carbohydrate # 少ない順（昇順）
+          when 'low_fat'
+            total_fat # 少ない順（昇順）
+          else
+            0
+          end
+        end
+      end
+
+      # 最終的な並び替えを適用
+      if recipes.is_a?(ActiveRecord::Relation)
+        order_conditions = []
+        order_conditions << "price #{order.upcase}" if price_range.present?
+        order_conditions << "cooking_time #{order.upcase}" if cooking_time.present?
+
+        # ActiveRecord::Relation に適用
+        recipes = recipes.order(order_conditions.join(", ")) unless order_conditions.empty?
+      else
+        # `recipes` が `Array` の場合、sort_by で並び替え
+        recipes = recipes.sort_by do |recipe|
+          [
+            price_range.present? ? recipe.price : 0,
+            cooking_time.present? ? recipe.cooking_time : 0
+          ]
+        end
+        recipes.reverse! if order == 'desc'
+      end
+
+      # レスポンス
+      render json: recipes
     end
 
+
     def show
-      recipe = Recipe.includes(:ingredients, :tags).find_by(id: params[:id])
-      
+      recipe = Recipe.includes(:ingredients, :category, :user, :steps).find_by(id: params[:id])
+    
       if recipe
-        render json: {
-          id: recipe.id,
-          title: recipe.title,
-          description: recipe.description,
-          cooking_time: recipe.cooking_time,
-          price: recipe.price,
-          category_id: recipe.category_id,
-          category_name: recipe.category.name, # カテゴリ名を追加（オプション）
-          image_url: recipe.image, # 必要に応じてURL形式に加工
-          user_id: recipe.user_id,
-          user_name: recipe.user.name, # ユーザー名を追加（オプション）
-          created_at: recipe.created_at,
-          updated_at: recipe.updated_at,
-          ingredients: recipe.ingredients.pluck(:name), # 材料名のリストを取得
-          tags: recipe.tags.pluck(:name), # タグ名のリストを取得
+        total_protein = recipe.ingredients.sum(&:protein)
+        total_carbohydrate = recipe.ingredients.sum(&:carbohydrate)
+        total_fat = recipe.ingredients.sum(&:fat)
+    
+        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :price]).merge({
+          category_name: recipe.category&.name,
+          user_name: recipe.user&.name,
+          total_nutrition: {
+            protein: total_protein,
+            carbohydrate: total_carbohydrate,
+            fat: total_fat
+          },
+          ingredients: recipe.ingredients.pluck(:name),
           steps: recipe.steps.map { |step| { step_number: step.step_number, instruction: step.instruction } }
-        }, status: :ok
+        })
       else
         render json: { error: 'Recipe not found' }, status: :not_found
       end
     end
-    
-    # GET /api/recipes/search
-    def search
-      keyword = params[:keyword]
-      price = params[:price]
-      cooking_time = params[:cooking_time]
-    
-      recipes = Recipe.all
-      recipes = recipes.where("title LIKE ?", "%#{keyword}%") if keyword.present?
-      recipes = recipes.where(price: price_range(price)) if price.present?
-      recipes = recipes.where("cooking_time <= ?", cooking_time.to_i) if cooking_time.present?
-    
-      if recipes.exists?
-        render json: recipes
-      else
-        render json: { error: "Recipe not found" }, status: :not_found
-      end
-    end
 
     private
-
-    def price_range(price)
-      case price
-      when "low"
-        0..500
-      when "medium"
-        501..1000
-      when "high"
-        1001..Float::INFINITY
-      else
-        nil
-      end
-    end
 
     def set_recipe
       @recipe = Recipe.find(params[:id])

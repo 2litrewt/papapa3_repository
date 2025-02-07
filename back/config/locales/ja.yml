@@ -1,0 +1,12 @@
+ja:
+  activerecord:
+    errors:
+      models:
+        recipe:
+          attributes:
+            user:
+              required: "ユーザーは必須です"
+            category:
+              required: "カテゴリは必須です"
+            image:
+              blank: "画像は必須です"
