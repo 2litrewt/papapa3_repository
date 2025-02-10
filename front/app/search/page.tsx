@@ -1,41 +1,53 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
-export default function SearchResults() {
-  const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(true); // 🔹 検索中の状態を管理
+// ✅ Recipe 型を定義
+interface Recipe {
+  id: number;
+  title: string;
+  image: string;
+  likes: number;
+  favorites: number;
+  price: number;
+  cooking_time: number;
+  ingredients: { name: string; protein: number; carbohydrate: number; fat: number }[];
+}
+
+const SearchResultsContent = () => {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const keyword = searchParams.get("query") || "";
   const time = searchParams.get("time");
   const price = searchParams.get("price");
-  const nutrition = searchParams.get("nutrition");
 
-  useEffect(() => {
-    fetchRecipes();
-  }, [keyword, time, price, nutrition]);
-
-  const fetchRecipes = async () => {
-    setLoading(true); // 🔹 検索開始時に `loading` を `true` にする
+  const fetchRecipes = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`http://localhost:3000/api/recipes`, {
-        params: { keyword, cooking_time: time, price_range: price, nutrition_type: nutrition }
+        params: { keyword, cooking_time: time, price_range: price },
       });
       setRecipes(response.data);
     } catch (error) {
       console.error("Error fetching recipes:", error);
     }
-    setLoading(false); // 🔹 検索完了後に `loading` を `false` にする
-  };
+    setLoading(false);
+  }, [keyword, time, price]);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [fetchRecipes]);
 
   return (
     <div className="container mx-auto px-4 py-8 pt-8">
-      {/* 🔹 検索中のメッセージを表示 */}
       {loading ? (
         <p className="text-center text-gray-500 text-lg">検索中...</p>
       ) : recipes.length === 0 ? (
@@ -51,7 +63,7 @@ export default function SearchResults() {
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
-                    <img src={recipe.image || "/placeholder.svg"} alt={recipe.title} className="w-full h-48 object-cover" />
+                    <Image src={recipe.image || "/placeholder.svg"} alt={recipe.title} width={300} height={200} className="w-full h-48 object-cover" />
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
@@ -87,5 +99,14 @@ export default function SearchResults() {
         </div>
       )}
     </div>
+  );
+};
+
+// ✅ Suspense で `useSearchParams()` をラップする
+export default function SearchResults() {
+  return (
+    <Suspense fallback={<p className="text-center text-gray-500">読み込み中...</p>}>
+      <SearchResultsContent />
+    </Suspense>
   );
 }

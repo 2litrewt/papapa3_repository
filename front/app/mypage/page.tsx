@@ -1,6 +1,6 @@
-import Link from "'next/link'"
+import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
-import { PenSquare, Heart, Bookmark, Users, UserPlus, Settings } from "'lucide-react'"
+import { PenSquare, Heart, Bookmark, Users, UserPlus, Settings } from "lucide-react"
 
 export default function MyPage() {
   return (

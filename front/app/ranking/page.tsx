@@ -1,6 +1,7 @@
-import Link from "'next/link'"
+import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
-import { Heart, Bookmark, Clock, DollarSign, Apple } from "'lucide-react'"
+import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react"
+import Image from "next/image";
 
 async function getTopRecipes() {
   // This is a mock function. In a real application, you would call an API here.
@@ -53,7 +54,7 @@ export default async function Ranking() {
             <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
               <CardContent className="p-0">
                 <div className="relative">
-                  <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
+                  <Image src={recipe.image} alt={recipe.title} width={300} height={200} className="w-full h-48 object-cover" />
                   <div className="absolute top-0 left-0 bg-gray-900 text-gray-50 px-2 py-1 text-lg font-bold dark:bg-gray-50 dark:text-gray-900">
                     #{index + 1}
                   </div>

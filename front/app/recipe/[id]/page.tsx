@@ -1,13 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation"; // 🔹 useParams を追加
+import { useRouter, useParams } from "next/navigation"; 
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
+import Image from "next/image";
+
+// ✅ Recipe 型を定義
+interface Recipe {
+  id: number;
+  title: string;
+  image: string;
+  likes: number;
+  favorites: number;
+  cooking_time: number;
+  price: number;
+  ingredients: { name: string; protein: number; carbohydrate: number; fat: number }[];
+  steps: { step_number: number; instruction: string }[];
+}
 
 export default function RecipeDetail() {
-  const [recipe, setRecipe] = useState<any>(null);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
   const params = useParams(); // 🔹 useParams で id を取得
   const recipeId = params?.id as string; // 🔹 型安全のため `as string` を追加
@@ -29,15 +44,15 @@ export default function RecipeDetail() {
   if (!recipe) return <div className="text-center text-gray-500">読み込み中...</div>;
 
   // 栄養価の合計を計算
-  const totalProtein = recipe.ingredients.reduce((sum: number, ing: any) => sum + (ing.protein || 0), 0);
-  const totalCarbohydrate = recipe.ingredients.reduce((sum: number, ing: any) => sum + (ing.carbohydrate || 0), 0);
-  const totalFat = recipe.ingredients.reduce((sum: number, ing: any) => sum + (ing.fat || 0), 0);
+  const totalProtein = recipe.ingredients.reduce((sum, ing) => sum + (ing.protein || 0), 0);
+  const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
+  const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <Card>
         <CardContent>
-          <img src={recipe.image || "/placeholder.svg"} alt={recipe.title} className="w-full h-[400px] object-cover mb-6" />
+          <Image src={recipe.image || "/placeholder.svg"} alt={recipe.title} width={400} height={300} className="w-full h-[400px] object-cover mb-6" />
           <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
 
           {/* いいね & お気に入り */}
@@ -75,7 +90,7 @@ export default function RecipeDetail() {
           {/* 材料 */}
           <h2 className="text-2xl font-semibold my-6">材料</h2>
           <ul className="list-disc list-inside mb-6">
-            {recipe.ingredients.map((ingredient: any, index: number) => (
+            {recipe.ingredients.map((ingredient, index) => (
               <li key={index}>{ingredient.name}</li>
             ))}
           </ul>
@@ -83,7 +98,7 @@ export default function RecipeDetail() {
           {/* 調理手順 */}
           <h2 className="text-2xl font-semibold mb-4">調理手順</h2>
           <ol className="list-decimal list-inside">
-            {recipe.steps.map((step: { step_number: number, instruction: string }, index: number) => (
+            {recipe.steps.map((step, index) => (
               <li key={index} className="mb-4">
                 <p className="mb-2">{step.instruction}</p>
               </li>

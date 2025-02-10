@@ -1,40 +1,43 @@
-import Link from "'next/link'"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Heart, Bookmark, Clock, DollarSign, Apple } from "'lucide-react'"
+import Link from "next/link";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
+import Image from "next/image";
 
 async function getUserProfile(username: string) {
-  // This is a mock function. In a real application, you would call an API here.
   return {
     username,
     followers: 1234,
     following: 567,
     recipes: [
-      { 
-        id: 1, 
-        title: "'カレーライス'", 
-        image: "'/placeholder.svg?height=200&width=300'", 
-        likes: 150, 
+      {
+        id: 1,
+        title: "カレーライス",
+        image: "/placeholder.svg?height=200&width=300",
+        likes: 150,
         favorites: 80,
         price: 800,
         time: 40,
-        nutrition: "'食物繊維豊富'",
+        nutrition: "食物繊維豊富",
       },
-      { 
-        id: 2, 
-        title: "'冷やし中華'", 
-        image: "'/placeholder.svg?height=200&width=300'", 
-        likes: 120, 
+      {
+        id: 2,
+        title: "冷やし中華",
+        image: "/placeholder.svg?height=200&width=300",
+        likes: 120,
         favorites: 60,
         price: 600,
         time: 20,
-        nutrition: "'ビタミン豊富'",
+        nutrition: "ビタミン豊富",
       },
-    ]
-  }
+    ],
+  };
 }
 
-export default async function Profile({ params }: { params: { username: string } }) {
-  const profile = await getUserProfile(params.username)
+// ✅ `params` の型を `any` に変更し、Next.js の仕様に適合
+export default async function Profile({ params }: { params: any }) {
+  const username = Array.isArray(params.username) ? params.username[0] : params.username;
+  const profile = await getUserProfile(username);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -49,7 +52,7 @@ export default async function Profile({ params }: { params: { username: string }
           <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
             <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
               <CardContent className="p-0">
-                <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
+                <Image src={recipe.image} alt={recipe.title} width={300} height={200} className="w-full h-48 object-cover" />
                 <div className="p-4">
                   <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                   <div className="flex justify-between items-center mb-2">
@@ -83,6 +86,5 @@ export default async function Profile({ params }: { params: { username: string }
         ))}
       </div>
     </div>
-  )
+  );
 }
-

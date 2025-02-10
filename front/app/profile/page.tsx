@@ -1,4 +1,5 @@
-import Link from "'next/link'"
+import Link from "next/link"
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // この関数は実際のAPIコールに置き換える必要があります
@@ -25,7 +26,8 @@ export default async function Profile() {
               <CardTitle>{recipe.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover mb-4" />
+            <Image src={recipe.image} alt={recipe.title} width={300} height={200} className="w-full h-48 object-cover mb-4" />
+
               <Link href={`/recipe/${recipe.id}`} className="text-blue-600 hover:underline">
                 詳細を見る
               </Link>
