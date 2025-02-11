@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
-import Image from "next/image";
 
 interface Profile {
   username: string;
@@ -20,8 +17,8 @@ async function getUserProfile(username: string): Promise<Profile> {
   };
 }
 
-// ✅ `params` の型を `any` に変更し、Next.js の仕様に適合
-export default function MyPage({ params }: { params: any }) {
+// ✅ `params` の型を `Record<string, string | string[]>` に修正
+export default function MyPage({ params }: { params: Record<string, string | string[]> }) {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   // `params.username` を `string` に確定

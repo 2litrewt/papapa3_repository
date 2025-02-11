@@ -28,8 +28,8 @@ const PostsPageContent = () => {
         const queryString = searchParams.toString();
         const response = await axios.get(`/api/recipes${queryString ? `?${queryString}` : ""}`);
         setRecipes(response.data);
-      } catch (err) {
-        setError("エラーが発生しました");
+      } catch {
+        setError("エラーが発生しました"); // ✅ `err` を削除し、単純にエラーメッセージをセット
       } finally {
         setLoading(false);
       }

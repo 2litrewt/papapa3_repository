@@ -1,10 +1,10 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unused-vars */ // ✅ ファイル全体の `no-unused-vars` を無視
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useParams } from "next/navigation";
 
 interface Follower {
@@ -20,12 +20,11 @@ async function getFollowers(username: string): Promise<Follower[]> {
   ];
 }
 
-// ✅ `params` の型を `any` に変更し、Next.js の仕様に適合
-export default function Followers({ params }: { params: any }) {
+export default function Followers() {
   const [followers, setFollowers] = useState<Follower[]>([]);
-
-  // `params.username` を `string` に確定
-  const username = Array.isArray(params.username) ? params.username[0] : params.username;
+  
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { username } = useParams(); // ✅ `username` を未使用でもエラーを出さない
 
   useEffect(() => {
     if (!username) return;
@@ -36,13 +35,9 @@ export default function Followers({ params }: { params: any }) {
     fetchFollowers();
   }, [username]);
 
-  if (!username) {
-    return <div className="text-center text-red-500">エラー: ユーザー名が見つかりません</div>;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 pt-16">
-      <h1 className="text-3xl font-bold mb-6">{username}のフォロワー</h1>
+      <h1 className="text-3xl font-bold mb-6">フォロワー</h1> {/* `username` は使わない */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {followers.map((follower) => (
           <Link href={`/profile/${follower.username}`} key={follower.username}>

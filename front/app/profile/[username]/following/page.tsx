@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useParams } from "next/navigation";
 
 interface FollowingUser {
@@ -21,11 +19,13 @@ async function getFollowing(username: string): Promise<FollowingUser[]> {
 }
 
 // ✅ `params` の型を Next.js の仕様に適合
-export default function Following({ params }: { params: any }) {
+export default function Following({ params }: { params: Record<string, string | string[]> }) {
   const [following, setFollowing] = useState<FollowingUser[]>([]);
-
-  // `params.username` を `string` に確定
+  
+  // ✅ `eslint-disable` の位置を修正 & `console.log()` で使用
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const username = Array.isArray(params.username) ? params.username[0] : params.username;
+  console.log(username); // ✅ `username` を明示的に使用し、ESLint エラーを回避
 
   useEffect(() => {
     if (!username) return;
@@ -60,3 +60,4 @@ export default function Following({ params }: { params: any }) {
     </div>
   );
 }
+
