@@ -18,14 +18,12 @@ async function getFollowing(username: string): Promise<FollowingUser[]> {
   ];
 }
 
-// ✅ `params` の型を Next.js の仕様に適合
-export default function Following({ params }: { params: Record<string, string | string[]> }) {
-  const [following, setFollowing] = useState<FollowingUser[]>([]);
-  
-  // ✅ `eslint-disable` の位置を修正 & `console.log()` で使用
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+// ✅ `useParams()` で `username` を取得する
+export default function Following() {
+  const params = useParams(); // ✅ `useParams()` を使用
   const username = Array.isArray(params.username) ? params.username[0] : params.username;
-  console.log(username); // ✅ `username` を明示的に使用し、ESLint エラーを回避
+  
+  const [following, setFollowing] = useState<FollowingUser[]>([]);
 
   useEffect(() => {
     if (!username) return;
@@ -60,4 +58,3 @@ export default function Following({ params }: { params: Record<string, string | 
     </div>
   );
 }
-
