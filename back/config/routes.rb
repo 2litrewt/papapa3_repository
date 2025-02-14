@@ -22,3 +22,12 @@ Rails.application.routes.draw do
   # **ここを追加**
   root to: proc { [200, {}, ['Rails API is running']] }
 end
+
+Category.create!(name: "ご飯")
+Category.create!(name: "麺")
+Category.create!(name: "煮物")
+Category.create!(name: "焼き物")
+Category.create!(name: "揚げ物")
+Category.create!(name: "サラダ")
+Category.create!(name: "スープ")
+Category.create!(name: "デザート")

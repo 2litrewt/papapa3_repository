@@ -1,0 +1,24 @@
+app = "back-main"
+
+[build]
+dockerfile = "Dockerfile.dev"  # 必要に応じてファイル名を変更
+
+
+[env]
+PORT = "3000"
+RAILS_ENV = "production"
+DATABASE_URL = "YOUR_DATABASE_URL"
+RAILS_MASTER_KEY = "YOUR_MASTER_KEY"
+
+[[services]]
+  http_checks = []
+  internal_port = 3000
+  processes = ["app"]
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
