@@ -1,20 +1,26 @@
-import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useEffect } from "react";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const categories = [
   "ご飯", "麺", "煮物", "焼き物", "揚げ物", "サラダ", "スープ", "デザート"
-]
+];
 
 const tags = [
   "冷たい", "温かい", "しょっぱい", "甘い", "辛い", "さっぱり", "こってり", "ヘルシー",
   "ボリューミー", "簡単", "時短", "おもてなし", "お弁当", "朝食", "昼食", "夕食",
   "おつまみ", "パーティー", "おやつ", "ダイエット", "筋トレ", "ベジタリアン", "ヴィーガン", "グルテンフリー",
   "低糖質", "高タンパク", "低カロリー", "高カロリー", "洋風", "和風", "中華風", "エスニック"
-]
+];
 
 export default function Home() {
+  // 環境変数の値を確認
+  useEffect(() => {
+console.log("本番環境の NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8 pt-16">
       <h1 className="text-6xl font-bold text-center mb-8">
@@ -85,6 +91,6 @@ export default function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 

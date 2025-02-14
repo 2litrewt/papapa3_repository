@@ -24,26 +24,30 @@ export default function RecipeDetail() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
-  const params = useParams(); // 🔹 useParams で id を取得
-  const recipeId = params?.id as string; // 🔹 型安全のため `as string` を追加
+  const params = useParams(); 
+  const recipeId = params?.id as string; 
 
+  // ✅ 環境変数から API のベースURLを取得
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+  
   useEffect(() => {
-    if (!recipeId) return; // 🔹 `id` が未定義の場合は処理しない
+    if (!recipeId) return;
     fetchRecipe();
   }, [recipeId]);
 
   const fetchRecipe = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
+      const apiUrl = `${API_BASE_URL}/api/recipes/${recipeId}`;
+      console.log("🔍 [APIリクエスト] Fetching from:", apiUrl); 
+      const response = await axios.get(apiUrl);
       setRecipe(response.data);
     } catch (error) {
-      console.error("Error fetching recipe:", error);
+      console.error("❌ [エラー] レシピの取得に失敗しました:", error);
     }
   };
 
   if (!recipe) return <div className="text-center text-gray-500">読み込み中...</div>;
 
-  // 栄養価の合計を計算
   const totalProtein = recipe.ingredients.reduce((sum, ing) => sum + (ing.protein || 0), 0);
   const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
   const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
@@ -55,7 +59,6 @@ export default function RecipeDetail() {
           <Image src={recipe.image || "/placeholder.svg"} alt={recipe.title} width={400} height={300} className="w-full h-[400px] object-cover mb-6" />
           <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
 
-          {/* いいね & お気に入り */}
           <div className="flex flex-wrap items-center gap-4 my-6">
             <div className="flex items-center">
               <Heart className="w-6 h-6 mr-2" />
@@ -67,7 +70,6 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* 時間 & 価格 */}
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="flex items-center">
               <Clock className="w-5 h-5 mr-1" />
@@ -79,7 +81,6 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* 栄養価 */}
           <div className="flex items-center mt-3">
             <Apple className="w-5 h-5 mr-2" />
             <span>
@@ -87,7 +88,6 @@ export default function RecipeDetail() {
             </span>
           </div>
 
-          {/* 材料 */}
           <h2 className="text-2xl font-semibold my-6">材料</h2>
           <ul className="list-disc list-inside mb-6">
             {recipe.ingredients.map((ingredient, index) => (
@@ -95,7 +95,6 @@ export default function RecipeDetail() {
             ))}
           </ul>
 
-          {/* 調理手順 */}
           <h2 className="text-2xl font-semibold mb-4">調理手順</h2>
           <ol className="list-decimal list-inside">
             {recipe.steps.map((step, index) => (

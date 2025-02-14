@@ -29,18 +29,28 @@ const SearchResultsContent = () => {
   const time = searchParams.get("time");
   const price = searchParams.get("price");
 
+  // ✅ 環境変数から API のベースURLを取得
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  // ✅ 環境変数の状態を確認するための `console.log()`
+  console.log("🛠️ 修正テスト - これは新しいログです | NEXT_PUBLIC_API_BASE_URL の型:", typeof process.env.NEXT_PUBLIC_API_BASE_URL);
+  console.log("🌍 修正テスト - 環境変数の値:", process.env.NEXT_PUBLIC_API_BASE_URL || "🚨 これは undefined 🚨");
+ 
+  // ✅ API の URL を作成
   const fetchRecipes = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipes`, {
+      const apiUrl = `${API_BASE_URL}/api/recipes`;
+      console.log("🔍 [APIリクエスト] Fetching from:", apiUrl); // ✅ どの API を参照しているか確認
+      const response = await axios.get(apiUrl, {
         params: { keyword, cooking_time: time, price_range: price },
       });
       setRecipes(response.data);
     } catch (error) {
-      console.error("Error fetching recipes:", error);
+      console.error("❌ [エラー] API の取得に失敗しました:", error);
     }
     setLoading(false);
-  }, [keyword, time, price]);
+  }, [keyword, time, price, API_BASE_URL]);
 
   useEffect(() => {
     fetchRecipes();
@@ -110,3 +120,4 @@ export default function SearchResults() {
     </Suspense>
   );
 }
+
