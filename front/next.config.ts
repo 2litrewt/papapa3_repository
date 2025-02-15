@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
+console.log("🛠️ Next.js 設定ファイルの適用確認: NEXT_PUBLIC_API_BASE_URL =", process.env.NEXT_PUBLIC_API_BASE_URL);
+
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000",
+  },
   async rewrites() {
     return [
       {
@@ -8,11 +13,8 @@ const nextConfig = {
       },
     ];
   },
-  env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "https://back-main.fly.dev",
-  },
   eslint: {
-    ignoreDuringBuilds: true, // ✅ `yarn build` で ESLint のエラーを無視
+    ignoreDuringBuilds: true,
   },
 };
 
