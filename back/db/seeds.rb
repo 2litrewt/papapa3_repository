@@ -1,84 +1,56 @@
-# エラーメッセージを英語に設定
-I18n.locale = :en
+ # db/seeds.rb
 
-# ユーザーの作成
-begin
-  user = User.create!(
-    name: "山田太郎",
-    email: "taro.yamada@example.com",
-    password: "password",
-    profile_image: "https://example.com/images/user1.jpg"
-  )
-rescue ActiveRecord::RecordInvalid => e
-  puts "User creation failed: #{e.record.errors.full_messages.join(', ')}"
+# ユーザーを作成（デモ用）
+user = User.first || User.create!(name: "デモユーザー", email: "demo@example.com", password: "password")
+
+# カテゴリを作成
+categories = %w[ご飯 麺 煮物 焼き物 揚げ物 サラダ スープ デザート].map do |category|
+  Category.find_or_create_by!(name: category)
 end
 
-# カテゴリーの作成
-begin
-  category1 = Category.create!(name: "和食")
-  category2 = Category.create!(name: "洋食")
-rescue ActiveRecord::RecordInvalid => e
-  puts "Category creation failed: #{e.record.errors.full_messages.join(', ')}"
-end
+# 材料を作成（ユニークなものだけ）
+ingredients_data = [
+  { name: "牛ひき肉", protein: 20, carbohydrate: 0, fat: 15 },
+  { name: "玉ねぎ", protein: 1, carbohydrate: 10, fat: 0 },
+  { name: "パン粉", protein: 2, carbohydrate: 15, fat: 1 },
+  { name: "卵", protein: 6, carbohydrate: 1, fat: 5 },
+  { name: "キャベツ", protein: 1, carbohydrate: 5, fat: 0 },
+  { name: "小麦粉", protein: 3, carbohydrate: 50, fat: 1 },
+  { name: "鶏肉", protein: 22, carbohydrate: 0, fat: 5 },
+  { name: "豆腐", protein: 8, carbohydrate: 2, fat: 4 }
+]
+ingredients = ingredients_data.map { |data| Ingredient.find_or_create_by!(data) }
 
-# タグの作成
-begin
-  tag1 = Tag.create!(name: "簡単")
-  tag2 = Tag.create!(name: "夕食")
-  tag3 = Tag.create!(name: "ヘルシー")
-rescue ActiveRecord::RecordInvalid => e
-  puts "Tag creation failed: #{e.record.errors.full_messages.join(', ')}"
-end
+# 20件のレシピを作成
+recipe_titles = [
+  "ハンバーグ", "カレーライス", "ラーメン", "味噌汁", "天ぷら", "サラダ", "抹茶パフェ", "肉じゃが", "親子丼", "とんかつ", "うどん", "卵焼き", "そば", "餃子", "寿司", "茶碗蒸し", "カツカレー", "オムライス", "たこ焼き"
+]
 
-# 材料の作成
-begin
-  ingredient1 = Ingredient.create!(name: "パスタ", protein: 13.0, carbohydrate: 75.0, fat: 1.5)
-  ingredient2 = Ingredient.create!(name: "トマトソース", protein: 2.0, carbohydrate: 10.0, fat: 5.0)
-  ingredient3 = Ingredient.create!(name: "卵", protein: 6.0, carbohydrate: 1.0, fat: 5.0)
-rescue ActiveRecord::RecordInvalid => e
-  puts "Ingredient creation failed: #{e.record.errors.full_messages.join(', ')}"
-end
-
-# レシピの作成
-begin
-  recipe1 = Recipe.create!(
-    title: "簡単パスタ",
-    description: "これは簡単に作れるパスタのレシピです。",
-    cooking_time: 20,
-    price: 500,
+recipe_titles.each do |title|
+  recipe = Recipe.create!(
+    title: title,
+    description: "#{title}の美味しいレシピです。",
+    cooking_time: rand(10..60),
+    price: rand(200..1000),
+    image: "#{title.parameterize.underscore}.jpg", # レシピ名をファイル名に適用
     user: user,
-    category: category2,
-    image: "https://example.com/images/pasta.jpg"
+    category: categories.sample
   )
 
-  recipe2 = Recipe.create!(
-    title: "和風オムレツ",
-    description: "和風の味付けが特徴のオムレツです。",
-    cooking_time: 15,
-    price: 300,
-    user: user,
-    category: category1,
-    image: "https://example.com/images/omelette.jpg"
-  )
-rescue ActiveRecord::RecordInvalid => e
-  puts "Recipe creation failed: #{e.record.errors.full_messages.join(', ')}"
+  # ランダムな材料を紐づける
+  selected_ingredients = ingredients.sample(3)
+  selected_ingredients.each do |ingredient|
+    RecipeIngredient.create!(recipe: recipe, ingredient: ingredient, quantity: rand(10..200))
+  end
+
+  # 調理手順を追加
+  3.times do |step_number|
+    Step.create!(
+      recipe: recipe,
+      step_number: step_number + 1,
+      instruction: "手順#{step_number + 1}の説明"
+    )
+  end
 end
 
-# レシピ材料の作成
-begin
-  RecipeIngredient.create!(recipe: recipe1, ingredient: ingredient1, quantity: 200.0)
-  RecipeIngredient.create!(recipe: recipe1, ingredient: ingredient2, quantity: 150.0)
-  RecipeIngredient.create!(recipe: recipe2, ingredient: ingredient3, quantity: 2.0)
-rescue ActiveRecord::RecordInvalid => e
-  puts "RecipeIngredient creation failed: #{e.record.errors.full_messages.join(', ')}"
-end
-
-# レシピタグの作成
-begin
-  RecipeTag.create!(recipe: recipe1, tag: tag1)
-  RecipeTag.create!(recipe: recipe1, tag: tag2)
-  RecipeTag.create!(recipe: recipe2, tag: tag1)
-  RecipeTag.create!(recipe: recipe2, tag: tag3)
-rescue ActiveRecord::RecordInvalid => e
-  puts "RecipeTag creation failed: #{e.record.errors.full_messages.join(', ')}"
-end
+puts "シードデータの作成が完了しました！"
