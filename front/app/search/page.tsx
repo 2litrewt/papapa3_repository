@@ -13,7 +13,7 @@ import Image from "next/image";
 interface Recipe {
   id: number;
   title: string;
-  image: string;
+  image?: string; // ❗ `image` が `undefined` にならないようにオプショナルに変更
   likes: number;
   favorites: number;
   price: number;
@@ -32,19 +32,18 @@ const SearchResultsContent = () => {
   // ✅ 環境変数から API のベースURLを取得
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  // ✅ 環境変数の状態を確認するための `console.log()`
-  console.log("🛠️ 修正テスト - これは新しいログです | NEXT_PUBLIC_API_BASE_URL の型:", typeof process.env.NEXT_PUBLIC_API_BASE_URL);
-  console.log("🌍 修正テスト - 環境変数の値:", process.env.NEXT_PUBLIC_API_BASE_URL || "🚨 これは undefined 🚨");
- 
   // ✅ API の URL を作成
   const fetchRecipes = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = `${API_BASE_URL}/api/recipes`;
-      console.log("🔍 [APIリクエスト] Fetching from:", apiUrl); // ✅ どの API を参照しているか確認
+      console.log("🔍 [APIリクエスト] Fetching from:", apiUrl);
+
       const response = await axios.get(apiUrl, {
         params: { keyword, cooking_time: time, price_range: price },
       });
+
+      console.log("✅ [APIレスポンス] 取得したレシピ:", response.data); // ✅ ここでレスポンスを確認
       setRecipes(response.data);
     } catch (error) {
       console.error("❌ [エラー] API の取得に失敗しました:", error);
@@ -69,11 +68,22 @@ const SearchResultsContent = () => {
             const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
 
+            // ✅ `recipe.image` の値を適切に処理
+            const imageUrl = recipe.image?.startsWith("http")
+              ? recipe.image // `http://` または `https://` ならそのまま使う
+              : `http://localhost:3000/images/${recipe.image}`;
+
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
-                    <Image src={recipe.image || "/placeholder.svg"} alt={recipe.title} width={300} height={200} className="w-full h-48 object-cover" />
+                    <Image 
+                      src={imageUrl} 
+                      alt={recipe.title} 
+                      width={300} 
+                      height={200} 
+                      className="w-full h-48 object-cover" 
+                    />
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
@@ -120,4 +130,3 @@ export default function SearchResults() {
     </Suspense>
   );
 }
-
