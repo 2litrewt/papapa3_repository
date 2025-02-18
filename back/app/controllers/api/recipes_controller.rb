@@ -83,7 +83,13 @@ module Api
       end
 
       # レスポンス
-      render json: recipes
+      render json: recipes.as_json(only: [:id, :title, :description, :cooking_time, :price, :image], include: {
+        category: { only: [:id, :name] },
+        tags: { only: [:id, :name] },
+        ingredients: { only: [:name, :protein, :carbohydrate, :fat] },
+        user: { only: [:id, :name, :profile_image] }
+      })
+
     end
 
 
@@ -95,7 +101,7 @@ module Api
         total_carbohydrate = recipe.ingredients.sum(&:carbohydrate)
         total_fat = recipe.ingredients.sum(&:fat)
     
-        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :price]).merge({
+        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :price,]).merge({
           category_name: recipe.category&.name,
           user_name: recipe.user&.name,
           total_nutrition: {
