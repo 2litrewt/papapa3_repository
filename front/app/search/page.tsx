@@ -32,38 +32,18 @@ const SearchResultsContent = () => {
   // ✅ 環境変数から API のベースURLを取得
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-<<<<<<< HEAD
-  // ✅ `useEffect` を使用して環境変数の確認
-  useEffect(() => {
-    console.log("🌍 [環境変数確認] NEXT_PUBLIC_API_BASE_URL:", API_BASE_URL || "🚨 環境変数が未定義 🚨");
-  }, []);
-
-=======
->>>>>>> develop
   // ✅ API の URL を作成
   const fetchRecipes = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = `${API_BASE_URL}/api/recipes`;
-<<<<<<< HEAD
-
-      // ✅ API リクエスト前にログ出力
-      console.log("📡 [APIリクエスト] Fetching from:", apiUrl);
-=======
       console.log("🔍 [APIリクエスト] Fetching from:", apiUrl);
->>>>>>> develop
 
       const response = await axios.get(apiUrl, {
         params: { keyword, cooking_time: time, price_range: price },
       });
 
-<<<<<<< HEAD
-      // ✅ API レスポンス確認
-      console.log("✅ [APIレスポンス] 取得データ:", response.data);
-
-=======
       console.log("✅ [APIレスポンス] 取得したレシピ:", response.data); // ✅ ここでレスポンスを確認
->>>>>>> develop
       setRecipes(response.data);
     } catch (error) {
       console.error("❌ [エラー] API の取得に失敗しました:", error);
