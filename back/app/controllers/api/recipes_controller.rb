@@ -117,6 +117,16 @@ module Api
       end
     end
 
+    def create
+      @recipe = Recipe.new(recipe_params)
+  
+      if @recipe.save
+        render json: { message: "レシピが作成されました", recipe: @recipe }, status: :created
+      else
+        render json: { errors: @recipe.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+
     private
 
     def set_recipe
@@ -124,5 +134,15 @@ module Api
     rescue ActiveRecord::RecordNotFound
       render json: { error: 'Recipe not found' }, status: :not_found
     end
+
+    def recipe_params
+      params.require(:recipe).permit(
+        :title, 
+        :description, 
+        :user_id,          
+        :category_id,      
+        :cooking_time,     
+        :price,  images: []) 
+    end    
   end
 end

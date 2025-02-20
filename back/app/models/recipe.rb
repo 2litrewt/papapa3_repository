@@ -6,6 +6,7 @@ class Recipe < ApplicationRecord
   has_many :recipe_tags, dependent: :destroy
   has_many :tags, through: :recipe_tags
   has_many :steps, -> { order(:step_number) }, dependent: :destroy
+  has_many_attached :images
 
   scope :with_nutrition_value, -> {
     select('recipes.*, (SELECT SUM((ingredients.protein + ingredients.carbohydrate + ingredients.fat) * recipe_ingredients.quantity)

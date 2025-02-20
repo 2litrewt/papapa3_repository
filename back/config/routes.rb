@@ -16,7 +16,7 @@ Rails.application.routes.draw do
   end
 
   # フロントエンドが直接アクセスする場合のパスも設定
-  resources :recipes, only: [:index], controller: 'api/recipes'
+  resources :recipes, only: [:index, :create], controller: 'api/recipes'
   resources :posts, only: [:index]
 
   # **ここを追加**
