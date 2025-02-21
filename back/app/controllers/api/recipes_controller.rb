@@ -119,13 +119,13 @@ module Api
 
     def create
       @recipe = Recipe.new(recipe_params)
-  
       if @recipe.save
         render json: { message: "レシピが作成されました", recipe: @recipe }, status: :created
       else
         render json: { errors: @recipe.errors.full_messages }, status: :unprocessable_entity
       end
     end
+    
 
     private
 
