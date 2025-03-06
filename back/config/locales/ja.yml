@@ -5,8 +5,14 @@ ja:
         recipe:
           attributes:
             user:
-              required: "ユーザーは必須です"
+              required: "ユーザーを入力してください"
             category:
-              required: "カテゴリは必須です"
-            image:
-              blank: "画像は必須です"
+              required: "カテゴリを入力してください"
+            description:
+              blank: "概要を入力してください"
+            cooking_time:
+              blank: "調理時間を入力してください"
+              not_a_number: "調理時間は数値で入力してください"
+            price:
+              blank: "価格を入力してください"
+              not_a_number: "価格は数値で入力してください"

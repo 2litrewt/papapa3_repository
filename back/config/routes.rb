@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   # API エンドポイント
   namespace :api do
     resources :posts, only: [:index] 
-    resources :recipes, only: [:index, :show, :search] do
+    resources :recipes, only: [:index, :show, :search, :create] do
       collection do
         get 'search', to: 'recipes#search'
       end

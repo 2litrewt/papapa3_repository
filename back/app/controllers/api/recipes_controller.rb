@@ -1,6 +1,6 @@
 module Api
   class RecipesController < ApplicationController
-    # GET /api/recipes
+    
     def index
       keyword = params[:keyword]
       cooking_time = params[:cooking_time] # 調理時間
@@ -10,7 +10,7 @@ module Api
       order = params[:order] || 'asc' # 昇降順
 
       # ベースクエリ
-      recipes = Recipe.includes(:ingredients)
+      recipes = Recipe.includes(:ingredients, :category, :user)
 
       # キーワード検索
       if keyword.present?
@@ -82,14 +82,15 @@ module Api
         recipes.reverse! if order == 'desc'
       end
 
-      # レスポンス
-      render json: recipes.as_json(only: [:id, :title, :description, :cooking_time, :price, :image], include: {
-        category: { only: [:id, :name] },
-        tags: { only: [:id, :name] },
-        ingredients: { only: [:name, :protein, :carbohydrate, :fat] },
-        user: { only: [:id, :name, :profile_image] }
-      })
-
+      #表示部分
+      render json: recipes.map { |recipe|
+  recipe.as_json(only: [:id, :title, :description, :cooking_time, :price], include: {
+    category: { only: [:id, :name] },
+    tags: { only: [:id, :name] },
+    ingredients: { only: [:name, :protein, :carbohydrate, :fat] },
+    user: { only: [:id, :name, :profile_image] }
+  }).merge(image_url: recipe.image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(recipe.image, host: "http://localhost:3000") : nil)
+}
     end
 
 
@@ -101,7 +102,7 @@ module Api
         total_carbohydrate = recipe.ingredients.sum(&:carbohydrate)
         total_fat = recipe.ingredients.sum(&:fat)
     
-        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :price,]).merge({
+        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :price, image_url: recipe.image_url]).merge({
           category_name: recipe.category&.name,
           user_name: recipe.user&.name,
           total_nutrition: {
@@ -117,14 +118,46 @@ module Api
       end
     end
 
+
     def create
-      @recipe = Recipe.new(recipe_params)
+      Rails.logger.debug "Received params: #{params.inspect}"  # 受け取ったパラメータの確認
+    
+      @recipe = Recipe.new(recipe_params.except(:ingredients)) # ingredients を除外して保存
+    
       if @recipe.save
-        render json: { message: "レシピが作成されました", recipe: @recipe }, status: :created
+        if params[:recipe][:ingredients].present?
+          Rails.logger.debug "ingredients param: #{params[:recipe][:ingredients].inspect}" # ログで確認
+    
+          begin
+            # JSON 形式で送られてくる場合を考慮
+            ingredients = params[:recipe][:ingredients].is_a?(String) ? JSON.parse(params[:recipe][:ingredients]) : params[:recipe][:ingredients]
+    
+            ingredients.each do |ingredient|
+              RecipeIngredient.create!(
+                recipe: @recipe,
+                ingredient_id: ingredient['ingredient_id'], # JSON の場合は String キー
+                quantity: ingredient['quantity']
+              )
+            end
+            
+          rescue JSON::ParserError => e
+            Rails.logger.error "JSON parse error in ingredients: #{e.message}"
+            return render json: { error: "Invalid JSON format for ingredients" }, status: :unprocessable_entity
+          rescue ActiveRecord::RecordInvalid => e
+            Rails.logger.error "RecipeIngredient save failed: #{e.record.errors.full_messages}"
+            return render json: { error: "Failed to save ingredients", details: e.record.errors.full_messages }, status: :unprocessable_entity
+          end
+        end
+    
+        render json: @recipe.serializable_hash(include: [:ingredients, :steps])
+    
       else
+        Rails.logger.error "Recipe save failed: #{@recipe.errors.full_messages}"  # エラー内容をログに出力
         render json: { errors: @recipe.errors.full_messages }, status: :unprocessable_entity
       end
     end
+    
+    
     
 
     private
@@ -137,12 +170,16 @@ module Api
 
     def recipe_params
       params.require(:recipe).permit(
-        :title, 
-        :description, 
-        :user_id,          
-        :category_id,      
-        :cooking_time,     
-        :price,  images: []) 
-    end    
+        :title,
+        :description,
+        :cooking_time,
+        :price,
+        :user_id,
+        :category_id,
+        :image,  
+        ingredients: [:ingredient_id, :quantity],  
+        steps_attributes: [:step_number, :instruction]  # steps_attributesを許可
+      )
+    end      
   end
 end

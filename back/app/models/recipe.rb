@@ -6,7 +6,7 @@ class Recipe < ApplicationRecord
   has_many :recipe_tags, dependent: :destroy
   has_many :tags, through: :recipe_tags
   has_many :steps, -> { order(:step_number) }, dependent: :destroy
-  has_many_attached :images
+  has_one_attached :image
 
   scope :with_nutrition_value, -> {
     select('recipes.*, (SELECT SUM((ingredients.protein + ingredients.carbohydrate + ingredients.fat) * recipe_ingredients.quantity)
@@ -15,8 +15,45 @@ class Recipe < ApplicationRecord
             WHERE recipe_ingredients.recipe_id = recipes.id) AS nutrition_value')
   }
 
+  accepts_nested_attributes_for :steps
+
+  def as_json(options = {})
+  Rails.logger.info "as_json called with options: #{options.inspect}"
+  data = ingredients_with_quantity
+  Rails.logger.info "ingredients_with_quantity: #{data.inspect}"
+  result = serializable_hash(except: [:ingredients, :recipe_ingredients, :image])
+  .merge(ingredients: data, image_url: image_url)
+  Rails.logger.info "as_json result: #{result.inspect}"
+  result
+end
+
+
+  def image_url
+    Rails.application.routes.url_helpers.rails_blob_url(image, only_path: true) if image.attached?
+  end
+
+
   validates :title, presence: true
   validates :description, presence: true
   validates :cooking_time, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :price, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  private
+
+  def ingredients_with_quantity
+    data = recipe_ingredients.includes(:ingredient).map do |ri|
+      {
+        id: ri.ingredient.id,
+        name: ri.ingredient.name,
+        protein: ri.ingredient.protein,
+        carbohydrate: ri.ingredient.carbohydrate,
+        fat: ri.ingredient.fat,
+        quantity: ri.quantity  # ここで quantity を追加
+      }
+    end
+
+    Rails.logger.info "ingredients_with_quantity: #{data.inspect}"  # ログでデバッグ
+  data
+
+  end
 end
