@@ -69,21 +69,19 @@ const SearchResultsContent = () => {
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
 
             // ✅ `recipe.image` の値を適切に処理
-            const imageUrl = recipe.image?.startsWith("http")
-              ? recipe.image // `http://` または `https://` ならそのまま使う
-              : `http://localhost:3000/images/${recipe.image}`;
+            const imageUrl = recipe.image_url ? recipe.image_url : "/placeholder.svg";
 
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
-                    <Image 
-                      src={imageUrl} 
-                      alt={recipe.title} 
-                      width={300} 
-                      height={200} 
-                      className="w-full h-48 object-cover" 
-                    />
+                  <div>
+                  <img
+  src={imageUrl}
+  alt={recipe.title}
+  width={300}
+  height={200}
+/></div>
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
