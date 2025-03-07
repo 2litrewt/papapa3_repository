@@ -31,7 +31,7 @@ Rails.application.configure do
   end
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  config.active_storage.service = :amazon
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
@@ -71,6 +71,12 @@ Rails.application.configure do
 
   # 既存の設定の下に追加
   config.hosts << "back"
+
+  #host を指定しなくてもOKになる
+  Rails.application.routes.default_url_options[:host] = "http://localhost:3000"
+
+  #詳細なエラーメッセージ表示
+  config.consider_all_requests_local = true
 
 
   Rails.application.config.middleware.insert_before 0, Rack::Cors do

@@ -39,3 +39,4 @@
 # typescript
 /front/*.tsbuildinfo
 /front/next-env.d.ts
+.vercel

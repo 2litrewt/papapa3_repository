@@ -1,17 +1,11 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # ヘルスチェック用エンドポイント
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Defines the root path route ("/")
-  # root "posts#index"
-
+  # API エンドポイント
   namespace :api do
-    resources :posts, only: [:index] # ここに追加
-    
-    resources :recipes, only: [:index, :show, :search] do
+    resources :posts, only: [:index] 
+    resources :recipes, only: [:index, :show, :search, :create] do
       collection do
         get 'search', to: 'recipes#search'
       end
@@ -21,10 +15,11 @@ Rails.application.routes.draw do
     resources :tags, only: [:index]
   end
 
-    # フロントエンドが直接アクセスする場合のパスも設定
-    resources :recipes, only: [:index], controller: 'api/recipes'
+  # フロントエンドが直接アクセスする場合のパスも設定
+  resources :recipes, only: [:index, :create], controller: 'api/recipes'
+  resources :posts, only: [:index]
 
-    resources :posts, only: [:index]
+  # **ここを追加**
+  root to: proc { [200, {}, ['Rails API is running']] }
 end
-
 

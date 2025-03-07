@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import Image from "next/image";
 interface Recipe {
   id: number;
   title: string;
-  image: string;
+  image?: string; // ❗ `image` が `undefined` にならないようにオプショナルに変更
   likes: number;
   favorites: number;
   price: number;
@@ -29,18 +29,27 @@ const SearchResultsContent = () => {
   const time = searchParams.get("time");
   const price = searchParams.get("price");
 
+  // ✅ 環境変数から API のベースURLを取得
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  // ✅ API の URL を作成
   const fetchRecipes = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipes`, {
+      const apiUrl = `${API_BASE_URL}/api/recipes`;
+      console.log("🔍 [APIリクエスト] Fetching from:", apiUrl);
+
+      const response = await axios.get(apiUrl, {
         params: { keyword, cooking_time: time, price_range: price },
       });
+
+      console.log("✅ [APIレスポンス] 取得したレシピ:", response.data); // ✅ ここでレスポンスを確認
       setRecipes(response.data);
     } catch (error) {
-      console.error("Error fetching recipes:", error);
+      console.error("❌ [エラー] API の取得に失敗しました:", error);
     }
     setLoading(false);
-  }, [keyword, time, price]);
+  }, [keyword, time, price, API_BASE_URL]);
 
   useEffect(() => {
     fetchRecipes();
@@ -59,11 +68,20 @@ const SearchResultsContent = () => {
             const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
 
+            // ✅ `recipe.image` の値を適切に処理
+            const imageUrl = recipe.image_url ? recipe.image_url : "/placeholder.svg";
+
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
-                    <Image src={recipe.image || "/placeholder.svg"} alt={recipe.title} width={300} height={200} className="w-full h-48 object-cover" />
+                  <div>
+                  <img
+  src={imageUrl}
+  alt={recipe.title}
+  width={300}
+  height={200}
+/></div>
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
