@@ -12,56 +12,19 @@ module Api
       # ベースクエリ
       recipes = Recipe.includes(:ingredients, :category, :user)
 
+
       # キーワード検索
-      if keyword.present?
-        recipes = recipes.where('title ILIKE ? OR description ILIKE ?', "%#{keyword}%", "%#{keyword}%")
-      end
+      @recipes = filter_recipes_by_keyword(@recipes, params[:keyword])
 
       # 価格帯の条件
-      if price_range.present?
-        case price_range
-        when 'low'
-          recipes = recipes.where('price <= ?', 500)
-        when 'medium'
-          recipes = recipes.where('price > ? AND price <= ?', 500, 1000)
-        when 'high'
-          recipes = recipes.where('price > ?', 1000)
-        end
-      end
+      @recipes = filter_recipes_by_price_range(@recipes, params[:price_range])
 
       # 調理時間の条件
-      if cooking_time.present?
-        case cooking_time
-        when 'short'
-          recipes = recipes.where('cooking_time <= ?', 30)
-        when 'medium'
-          recipes = recipes.where('cooking_time > ? AND cooking_time <= ?', 30, 60)
-        when 'long'
-          recipes = recipes.where('cooking_time > ?', 60)
-        end
-      end
+      @recipes = filter_recipes_by_cooking_time(@recipes,params[:cooking_time])
 
       # 栄養タイプの条件（Ruby側で並び替え）
-      if nutrition_type.present?
-        recipes = recipes.sort_by do |recipe|
-          total_protein = recipe.ingredients.sum(&:protein).to_f
-          total_carbohydrate = recipe.ingredients.sum(&:carbohydrate).to_f
-          total_fat = recipe.ingredients.sum(&:fat).to_f
+      @recipes = sort_recipes_by_nutrition(@recipes, params[:nutrition_type])
 
-          Rails.logger.info "Recipe ID: #{recipe.id}, Protein: #{total_protein}, Carbohydrate: #{total_carbohydrate}, Fat: #{total_fat}"
-
-          case nutrition_type
-          when 'high_protein'
-            -total_protein # 多い順（降順）
-          when 'low_carb'
-            total_carbohydrate # 少ない順（昇順）
-          when 'low_fat'
-            total_fat # 少ない順（昇順）
-          else
-            0
-          end
-        end
-      end
 
       # 最終的な並び替えを適用
       if recipes.is_a?(ActiveRecord::Relation)
