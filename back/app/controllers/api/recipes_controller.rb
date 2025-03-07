@@ -102,7 +102,7 @@ module Api
         total_carbohydrate = recipe.ingredients.sum(&:carbohydrate)
         total_fat = recipe.ingredients.sum(&:fat)
     
-        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :price, image_url: recipe.image_url]).merge({
+        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :steps, :price, image_url: recipe.image_url]).merge({
           category_name: recipe.category&.name,
           user_name: recipe.user&.name,
           total_nutrition: {
@@ -110,8 +110,7 @@ module Api
             carbohydrate: total_carbohydrate,
             fat: total_fat
           },
-          ingredients: recipe.ingredients.pluck(:name),
-          steps: recipe.steps.map { |step| { step_number: step.step_number, instruction: step.instruction } }
+          ingredients: recipe.ingredients.pluck(:name)
         })
       else
         render json: { error: 'Recipe not found' }, status: :not_found
@@ -122,8 +121,19 @@ module Api
     def create
       Rails.logger.debug "Received params: #{params.inspect}"  # 受け取ったパラメータの確認
     
-      @recipe = Recipe.new(recipe_params.except(:ingredients)) # ingredients を除外して保存
+      @recipe = Recipe.new(recipe_params.except(:ingredients, :steps_attributes)) # ingredients を除外して保存
     
+      if params[:recipe][:steps_attributes].is_a?(String)
+        begin
+          params[:recipe][:steps_attributes] = JSON.parse(params[:recipe][:steps_attributes])
+        rescue JSON::ParserError => e
+          Rails.logger.error "JSON parse error in steps_attributes: #{e.message}"
+          return render json: { error: "Invalid JSON format for steps_attributes" }, status: :unprocessable_entity
+        end
+      end
+
+      @recipe.assign_attributes(recipe_params.slice(:steps_attributes))
+
       if @recipe.save
         if params[:recipe][:ingredients].present?
           Rails.logger.debug "ingredients param: #{params[:recipe][:ingredients].inspect}" # ログで確認

@@ -19,10 +19,17 @@ class Recipe < ApplicationRecord
 
   def as_json(options = {})
   Rails.logger.info "as_json called with options: #{options.inspect}"
+
   data = ingredients_with_quantity
   Rails.logger.info "ingredients_with_quantity: #{data.inspect}"
+
   result = serializable_hash(except: [:ingredients, :recipe_ingredients, :image])
-  .merge(ingredients: data, image_url: image_url)
+  .merge(ingredients: data, 
+        image_url: image_url,
+        steps: steps.map { |step| { step_number: step.step_number, instruction: step.instruction } } 
+        )
+        #ingredientと同様リファクタリングできる
+
   Rails.logger.info "as_json result: #{result.inspect}"
   result
 end
