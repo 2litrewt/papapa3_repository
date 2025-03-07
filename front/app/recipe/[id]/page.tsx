@@ -95,11 +95,15 @@ export default function RecipeDetail() {
 
           <h2 className="text-2xl font-semibold mb-4">調理手順</h2>
           <ol className="list-decimal list-inside">
-            {recipe.steps.map((step, index) => (
+          {recipe.steps ? (
+            recipe.steps.map((step, index) => (
               <li key={index} className="mb-4">
                 <p className="mb-2">{step.instruction}</p>
               </li>
-            ))}
+            ))
+          ) : (
+            <p>調理手順がありません</p>
+          )}
           </ol>
         </CardContent>
       </Card>
