@@ -64,13 +64,21 @@ const SearchResultsContent = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recipes.map((recipe) => {
+            console.log("Recipe Image:", recipe.image); // 画像URLの確認
+
             const totalProtein = recipe.ingredients.reduce((sum, ing) => sum + (ing.protein || 0), 0);
             const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
 
-            // ✅ `recipe.image` の値を適切に処理
-            const imageUrl = recipe.image_url ? recipe.image_url : "/placeholder.svg";
-
+             // ✅ 画像が `null` または `undefined` の場合、デフォルト画像を使用
+             const defaultImage = "/default-image.jpg"; // ✅ フロントエンドの `public/` にある画像を指定
+             const imageUrl = recipe.image
+             
+              ? recipe.image.startsWith("http")
+                ? recipe.image
+                : `http://localhost:3000/images/${recipe.image}`
+              : defaultImage; // `null` や `undefined` の場合、デフォルト画像を設定
+              console.log("ImageUrl:", imageUrl);
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
