@@ -69,7 +69,7 @@ const SearchResultsContent = () => {
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
 
             // ✅ `recipe.image` の値を適切に処理
-            const imageUrl = recipe.image_url ? recipe.image_url : "/placeholder.svg";
+            const imageUrl = recipe.image_url ?? "/DALL.webp";
 
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
