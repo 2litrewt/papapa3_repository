@@ -76,12 +76,7 @@ const SearchResultsContent = () => {
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
                   <div>
-                  <img
-  src={imageUrl}
-  alt={recipe.title}
-  width={300}
-  height={200}
-/></div>
+                  <img src={imageUrl} alt={recipe.title} width={300} height={200}/></div>
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
