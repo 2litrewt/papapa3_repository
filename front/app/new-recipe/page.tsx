@@ -60,10 +60,13 @@ export default function NewRecipe() {
     formData.append("recipe[cooking_time]", String(cookingTime));
     formData.append("recipe[price]", String(price));
     if (image) {
-      formData.append("recipe[image]", image);
+      formData.append("image", image);
     }
 
+    console.log("🔍 送信するデータ:", formData);
+
     try {
+      console.log("🚀 API リクエストを送信します...");
       const response = await axios.post("http://localhost:3000/recipes", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -114,7 +117,7 @@ export default function NewRecipe() {
             {/* 画像 */}
             <div>
               <label htmlFor="image" className="block mb-1">料理画像</label>
-              <Input type="file" id="image" accept="image/*" onChange={handleImageChange} required />
+              <Input type="file" id="image" accept="image/*" onChange={handleImageChange}  />
             </div>
             <Button type="submit" className="w-full">投稿する</Button>
           </form>

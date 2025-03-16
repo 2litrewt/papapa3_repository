@@ -70,26 +70,16 @@ const SearchResultsContent = () => {
             const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
 
-             // ✅ 画像が `null` または `undefined` の場合、デフォルト画像を使用
-             const defaultImage = "/default-image.jpg"; // ✅ フロントエンドの `public/` にある画像を指定
-             const imageUrl = recipe.image
-             
-              ? recipe.image.startsWith("http")
-                ? recipe.image
-                : `http://localhost:3000/images/${recipe.image}`
-              : defaultImage; // `null` や `undefined` の場合、デフォルト画像を設定
-              console.log("ImageUrl:", imageUrl);
+
+            // ✅ `recipe.image` の値を適切に処理
+            const imageUrl = recipe.image_url ?? "/DALL.webp";
+
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
                   <div>
-                  <img
-  src={imageUrl}
-  alt={recipe.title}
-  width={300}
-  height={200}
-/></div>
+                  <img src={imageUrl} alt={recipe.title} width={300} height={200}/></div>
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
