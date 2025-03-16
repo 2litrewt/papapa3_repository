@@ -64,9 +64,12 @@ const SearchResultsContent = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recipes.map((recipe) => {
+            console.log("Recipe Image:", recipe.image); // 画像URLの確認
+
             const totalProtein = recipe.ingredients.reduce((sum, ing) => sum + (ing.protein || 0), 0);
             const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
+
 
             // ✅ `recipe.image` の値を適切に処理
             const imageUrl = recipe.image_url ?? "/DALL.webp";
