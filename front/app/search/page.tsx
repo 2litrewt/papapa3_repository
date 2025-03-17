@@ -83,14 +83,14 @@ const SearchResultsContent = () => {
                     <div className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center space-x-2">
-                          <Heart className="w-5 h-5" />
-                          <span>{recipe.likes || 0}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
+                        {/* <div className="flex items-center space-x-2"> */}
+                          {/* <Heart className="w-5 h-5" /> */}
+                          {/* <span>{recipe.likes || 0}</span> */}
+                        {/* </div> */}
+                        {/* <div className="flex items-center space-x-2">
                           <Bookmark className="w-5 h-5" />
                           <span>{recipe.favorites || 0}</span>
-                        </div>
+                        </div> */}
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         <div className="flex items-center">

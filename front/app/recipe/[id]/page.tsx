@@ -54,10 +54,10 @@ export default function RecipeDetail() {
         <CardContent>
           <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
           <p className="text-gray-600 mb-4">{recipe.description}</p>
-          <p className="text-sm text-gray-500">カテゴリー: {recipe.category_name}</p>
+          {/* <p className="text-sm text-gray-500">カテゴリー: {recipe.category_name}</p> */}
           <p className="text-sm text-gray-500">作成者: {recipe.user_name}</p>
 
-          <div className="flex flex-wrap items-center gap-4 my-6">
+          {/* <div className="flex flex-wrap items-center gap-4 my-6">
             <div className="flex items-center">
               <Heart className="w-6 h-6 mr-2" />
               <span>いいね機能未実装</span>
@@ -66,7 +66,7 @@ export default function RecipeDetail() {
               <Bookmark className="w-6 h-6 mr-2" />
               <span>お気に入り機能未実装</span>
             </div>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="flex items-center">
