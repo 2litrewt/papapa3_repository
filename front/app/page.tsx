@@ -69,7 +69,7 @@ export default function Home() {
           </div>
         </form>
       </div>
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">料理カテゴリ</h2>
         <div className="grid grid-cols-4 gap-4">
           {categories.map((category) => (
@@ -92,7 +92,7 @@ export default function Home() {
             </Link>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
