@@ -1,6 +1,5 @@
 class User < ApplicationRecord
-  # パスワードのセキュリティ
-  has_secure_password
+
 
   # アソシエーション
   has_many :recipes, dependent: :destroy
