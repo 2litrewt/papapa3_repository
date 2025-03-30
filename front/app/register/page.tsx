@@ -7,15 +7,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 
 export default function Register() {
-  const [username, setUsername] = useState("''")
-  const [email, setEmail] = useState("''")
-  const [password, setPassword] = useState("''")
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
     // ここで新規登録処理を実装します
     console.log("'Registration attempt'", { username, email, password })
-  }
+
+    const res = await fetch('http://localhost:3000/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+        password_confirmation: password
+      })
+    })
+
+    const data = await res.json()
+    console.log('登録結果:', data)
+}
 
   return (
     <div className="container mx-auto px-4 py-8">
