@@ -16,14 +16,14 @@
 # end
 
 # back/config/initializers/cors.rb
-
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins 'http://localhost:4000' # Next.js の URL を指定
-
+    origins 'http://localhost:4000'  # Next.js の開発サーバー
     resource '*',
       headers: :any,
       expose: ['access-token', 'expiry', 'token-type', 'uid', 'client'],
-      methods: [:get, :post, :put, :patch, :delete, :options, :head]
+      methods: [:get, :post, :put, :patch, :delete, :options, :head],
+      credentials: true
   end
 end
+
