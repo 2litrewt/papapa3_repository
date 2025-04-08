@@ -104,7 +104,14 @@ end
         total_carbohydrate = recipe.ingredients.sum(&:carbohydrate)
         total_fat = recipe.ingredients.sum(&:fat)
     
-        render json: recipe.as_json(only: [:id, :title, :description, :cooking_time, :steps, :price, image_url: recipe.image_url]).merge({
+        render json: {
+          id: recipe.id,
+          title: recipe.title, 
+          description: recipe.description, 
+          cooking_time: recipe.cooking_time, 
+          steps: recipe.steps, 
+          price: recipe.price, 
+          image_url: recipe.image_url,
           category_name: recipe.category&.name,
           user_name: recipe.user&.name,
           total_nutrition: {
@@ -113,7 +120,7 @@ end
             fat: total_fat
           },
           ingredients: recipe.ingredients.pluck(:name)
-        })
+        }
       else
         render json: { error: 'Recipe not found' }, status: :not_found
       end

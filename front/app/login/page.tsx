@@ -49,6 +49,7 @@ export default function Login() {
         localStorage.setItem("access-token", accessToken)
         localStorage.setItem("client", client)
         localStorage.setItem("uid", uid)
+        localStorage.setItem("user_id", data.data.id.toString())
         localStorage.setItem("name", data.data.name) // 名前も保存
         localStorage.setItem("email", data.data.email)
         window.location.href = "/" // ホームに遷移
