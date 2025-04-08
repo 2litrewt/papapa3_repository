@@ -1,6 +1,5 @@
 class User < ApplicationRecord
-  # パスワードのセキュリティ
-  has_secure_password
+
 
   # アソシエーション
   has_many :recipes, dependent: :destroy
@@ -14,4 +13,10 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
   
+  devise :database_authenticatable, :registerable,
+  :recoverable, :rememberable, :validatable,
+  :trackable # ←なければ追加
+
+include DeviseTokenAuth::Concerns::User
+
 end

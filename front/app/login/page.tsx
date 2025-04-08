@@ -1,20 +1,64 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 
 export default function Login() {
-  const [email, setEmail] = useState("''")
-  const [password, setPassword] = useState("''")
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // ここでログイン処理を実装します
     console.log("'Login attempt'", { email, password })
-  }
+  
+    const res = await fetch("http://localhost:3000/auth/sign_in", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    })
+
+    console.log("レスポンスステータス:", res.status)
+    console.log("access-token:", res.headers.get("access-token"))
+    console.log("client:", res.headers.get("client"))
+    console.log("uid:", res.headers.get("uid"))
+
+    for (let [key, value] of res.headers.entries()) {
+      console.log(`${key}: ${value}`)
+    }
+  
+    if (res.ok) {
+      const data = await res.json()
+      const accessToken = res.headers.get("access-token")
+      const client = res.headers.get("client")
+      const uid = res.headers.get("uid")
+  
+      // ここで localStorage に保存
+      if (accessToken && client && uid) {
+        localStorage.setItem("access-token", accessToken)
+        localStorage.setItem("client", client)
+        localStorage.setItem("uid", uid)
+        localStorage.setItem("user_id", data.data.id.toString())
+        localStorage.setItem("name", data.data.name) // 名前も保存
+        localStorage.setItem("email", data.data.email)
+        window.location.href = "/" // ホームに遷移
+      }
+    } else {
+      const error = await res.json()
+      console.error("ログイン失敗:", error)
+    }
+  }   
 
   return (
     <div className="container mx-auto px-4 py-8">

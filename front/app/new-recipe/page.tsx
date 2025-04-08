@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +14,7 @@ export default function NewRecipe() {
   const [instructions, setInstructions] = useState("");
   const [image, setImage] = useState<File | null>(null);
 
-  const [userId, setUserId] = useState<number>(1);
+  const [userId, setUserId] = useState<number>();
   const [categoryId, setCategoryId] = useState<number>(1);
   const [cookingTime, setCookingTime] = useState<number>(30);
   const [price, setPrice] = useState<number>(1000);
@@ -26,6 +26,13 @@ export default function NewRecipe() {
     setImage(e.target.files?.[0] || null);
   };
 
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("user_id")
+    if (storedUserId) {
+      setUserId(Number(storedUserId)) // ← ここでセット
+    }
+  }, [])
+  
   // 材料の入力を処理する関数
   const handleIngredientsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const ingredientsArray = e.target.value

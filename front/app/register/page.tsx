@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -7,15 +8,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 
 export default function Register() {
-  const [username, setUsername] = useState("''")
-  const [email, setEmail] = useState("''")
-  const [password, setPassword] = useState("''")
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
     // ここで新規登録処理を実装します
-    console.log("'Registration attempt'", { username, email, password })
-  }
+    console.log("'Registration attempt'", { name, email, password })
+
+    const res = await fetch('http://localhost:3000/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        password_confirmation: password
+      })
+    })
+
+    const data = await res.json()
+    console.log('登録結果:', data)
+}
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -26,12 +44,12 @@ export default function Register() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block mb-1">ユーザー名</label>
+              <label htmlFor="name" className="block mb-1">ユーザー名</label>
               <Input
                 type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
@@ -65,4 +83,5 @@ export default function Register() {
     </div>
   )
 }
+
 
