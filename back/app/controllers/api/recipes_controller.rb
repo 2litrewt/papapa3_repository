@@ -1,6 +1,8 @@
 module Api
   class RecipesController < ApplicationController
-    
+
+    include Rails.application.routes.url_helpers
+
     def index
       keyword = params[:keyword]
       cooking_time = params[:cooking_time] # 調理時間
@@ -128,7 +130,7 @@ end
 
 
     def create
-      Rails.logger.debug "Received params: #{params.inspect}"  # 受け取ったパラメータの確認
+      Rails.logger.debug "受け取った params: #{params.inspect}"  # 受け取ったパラメータの確認
     
       @recipe = Recipe.new(recipe_params.except(:ingredients, :steps_attributes)) # ingredients を除外して保存
     
@@ -144,6 +146,10 @@ end
       @recipe.assign_attributes(recipe_params.slice(:steps_attributes))
 
       if @recipe.save
+        @recipe.image.attach(params[:image]) if params[:image].present?
+        Rails.logger.debug "✅ image attachedされた?: #{@recipe.image.attached?}"
+        Rails.logger.debug "🔗 image_url: #{url_for(@recipe.image) if @recipe.image.attached?}"
+        
         if params[:recipe][:ingredients].present?
           Rails.logger.debug "ingredients param: #{params[:recipe][:ingredients].inspect}" # ログで確認
     
@@ -168,16 +174,15 @@ end
           end
         end
     
-        render json: @recipe.serializable_hash(include: [:ingredients, :steps])
-    
+        render json: @recipe.serializable_hash(include: [:ingredients, :steps]).merge({
+          image_url: @recipe.image.attached? ? url_for(@recipe.image) : nil
+        })
+            
       else
         Rails.logger.error "Recipe save failed: #{@recipe.errors.full_messages}"  # エラー内容をログに出力
         render json: { errors: @recipe.errors.full_messages }, status: :unprocessable_entity
       end
     end
-    
-    
-    
 
     private
 
