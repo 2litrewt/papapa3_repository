@@ -70,7 +70,7 @@ export default function NewRecipe() {
       formData.append("image", image);
     }
 
-    console.log("🔍 送信するデータ:", formData);
+    console.log("🔍 送信予定のデータ:", formData);
 
     try {
       console.log("🚀 API リクエストを送信します...");
@@ -78,7 +78,7 @@ export default function NewRecipe() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setMessage("レシピが正常にアップロードされました！");
-      console.log("アップロード成功:", response.data);
+      console.log("送信できたデータ:", response.data);
     } catch (error: any) {
       console.error("アップロードエラー:", error.response ? error.response.data : error.message);
       setMessage("アップロードに失敗しました。コンソールを確認してください。");
