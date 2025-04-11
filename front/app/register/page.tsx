@@ -17,7 +17,7 @@ export default function Register() {
     // ここで新規登録処理を実装します
     console.log("'Registration attempt'", { name, email, password })
 
-    const res = await fetch('http://localhost:3000/auth', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -27,7 +27,7 @@ export default function RecipeDetail() {
   const recipeId = params?.id as string;
 
   // ✅ 環境変数から API のベースURLを取得
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   useEffect(() => {
     if (!recipeId) return;

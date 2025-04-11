@@ -74,7 +74,7 @@ export default function NewRecipe() {
 
     try {
       console.log("🚀 API リクエストを送信します...");
-      const response = await axios.post("http://localhost:3000/recipes", formData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recipes`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setMessage("レシピが正常にアップロードされました！");
