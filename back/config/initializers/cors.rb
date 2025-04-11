@@ -18,7 +18,9 @@
 # back/config/initializers/cors.rb
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins 'http://localhost:4000'  # Next.js の開発サーバー
+    origins 'http://localhost:4000', 'https://papapa3-repository-auth-git-develop-2lts-projects.vercel.app'
+
+
     resource '*',
       headers: :any,
       expose: ['access-token', 'expiry', 'token-type', 'uid', 'client'],
