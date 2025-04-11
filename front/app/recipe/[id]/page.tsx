@@ -18,6 +18,7 @@ interface Recipe {
   total_nutrition: { protein: number; carbohydrate: number; fat: number };
   ingredients: string[]; // ✅ 文字列の配列になっている
   steps: { step_number: number; instruction: string }[];
+  image_url?: string; 
 }
 
 export default function RecipeDetail() {

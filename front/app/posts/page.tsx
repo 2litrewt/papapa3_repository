@@ -13,6 +13,7 @@ interface Recipe {
   description: string;
   cooking_time: number;
   price: number;
+  image_url?: string; 
 }
 
 const PostsPageContent = () => {

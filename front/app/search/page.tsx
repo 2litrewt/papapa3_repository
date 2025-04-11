@@ -19,6 +19,7 @@ interface Recipe {
   price: number;
   cooking_time: number;
   ingredients: { name: string; protein: number; carbohydrate: number; fat: number }[];
+  image_url?: string; 
 }
 
 const SearchResultsContent = () => {
