@@ -16,7 +16,7 @@ export default function Login() {
     e.preventDefault()
     console.log("'Login attempt'", { email, password })
   
-    const res = await fetch("http://localhost:3000/auth/sign_in", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sign_in`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
