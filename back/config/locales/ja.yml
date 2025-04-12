@@ -1,7 +1,14 @@
 ja:
   activerecord:
+    attributes:
+      ingredient:
+        ingredient: 材料
     errors:
       models:
+        ingredient:
+          attributes:
+            ingredient:
+              required: "を入力してください"
         recipe:
           attributes:
             user:

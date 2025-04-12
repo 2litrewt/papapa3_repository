@@ -32,7 +32,7 @@ recipe_titles.each do |title|
     description: "#{title}の美味しいレシピです。",
     cooking_time: rand(10..60),
     price: rand(200..1000),
-    image: "#{title.parameterize.underscore}.jpg", # レシピ名をファイル名に適用
+    # image: "#{title.parameterize.underscore}.jpg", # レシピ名をファイル名に適用
     user: user,
     category: categories.sample
   )
