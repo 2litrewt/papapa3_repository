@@ -41,6 +41,8 @@ end
         image,
         host: ENV.fetch("BACKEND_HOST", "http://localhost:3000")
       )
+      Rails.logger.info "[DEBUG] image_url: #{url}"
+    url
     else
       nil
     end
