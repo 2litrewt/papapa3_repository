@@ -37,7 +37,10 @@ end
 
   def image_url
     if image.attached?
-      Rails.application.routes.url_helpers.rails_blob_url(image, only_path: true)
+      Rails.application.routes.url_helpers.rails_blob_url(
+        image,
+        host: ENV.fetch("BACKEND_HOST", "http://localhost:3000")
+      )
     else
       nil
     end
