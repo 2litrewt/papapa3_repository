@@ -31,7 +31,7 @@ const SearchResultsContent = () => {
   const price = searchParams.get("price");
 
   // ✅ 環境変数から API のベースURLを取得
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // ✅ API の URL を作成
   const fetchRecipes = useCallback(async () => {
