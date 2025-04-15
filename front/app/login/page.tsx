@@ -22,6 +22,7 @@ export default function Login() {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
+      credentials: "omit", // 👈 明示的にCookieや認証情報を送らない
       body: JSON.stringify({
         email,
         password,
