@@ -87,7 +87,8 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  config.middleware.insert_before 0, Rack::Cors, debug: true, logger: (-> { Rails.logger })
 
-  Rails.application.routes.default_url_options[:host] = ENV.fetch("BACKEND_HOST", "http://localhost:3000")
+  Rails.application.routes.default_url_options[:host] = 'https://back-main.fly.dev'
 
 end

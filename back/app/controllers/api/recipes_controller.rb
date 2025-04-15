@@ -9,7 +9,9 @@ module Api
       price_range = params[:price_range]  # 価格帯
       nutrition_type = params[:nutrition_type] # 栄養タイプ
       sort_by = params[:sortBy] || 'created_at' # ソート項目
-      order = params[:order] || 'asc' # 昇降順
+      order = params[:order] || 'asc' # 
+      
+      host = Rails.env.production? ? "https://back-main.fly.dev" : "http://localhost:3000"
 
       # ベースクエリ
       recipes = Recipe.includes(:ingredients, :category, :user)
@@ -85,17 +87,21 @@ else
   recipes.reverse! if order == 'desc'
 end
 
-
-      #表示部分
-      render json: recipes.map { |recipe|
-  recipe.as_json(only: [:id, :title, :description, :cooking_time, :price], include: {
-    category: { only: [:id, :name] },
-    tags: { only: [:id, :name] },
-    ingredients: { only: [:name, :protein, :carbohydrate, :fat] },
-    user: { only: [:id, :name, :profile_image] }
-  }).merge(image_url: recipe.image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(recipe.image, host: "http://localhost:3000") : nil)
-}
-    end
+  #表示部分
+  render json: recipes.map { |recipe|
+    recipe.as_json(
+      only: [:id, :title, :description, :cooking_time, :price], 
+      include: {
+        category: { only: [:id, :name] },
+        tags: { only: [:id, :name] },
+        ingredients: { only: [:name, :protein, :carbohydrate, :fat] },
+        user: { only: [:id, :name, :profile_image] }
+      } 
+    ).merge(
+      image_url: recipe.image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(recipe.image, host: host) : nil
+    )
+  }
+end
 
 
     def show

@@ -43,10 +43,6 @@ module App
     #     resource '*', headers: :any, methods: [:get, :post, :patch, :put, :delete, :options, :head]
     #   end
     # end
-    config.after_initialize do
-      ActiveStorage::Current.host = ENV.fetch("BACKEND_HOST", "http://localhost:3000")
-    end
-    
           
   end
 end

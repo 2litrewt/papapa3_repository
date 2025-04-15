@@ -34,19 +34,18 @@ class Recipe < ApplicationRecord
   result
 end
 
-
-  def image_url
-    if image.attached?
-      Rails.application.routes.url_helpers.rails_blob_url(
-        image,
-        host: ENV.fetch("BACKEND_HOST", "http://localhost:3000")
-      )
-      Rails.logger.info "[DEBUG] image_url: #{url}"
+def image_url
+  if image.attached?
+    url = Rails.application.routes.url_helpers.rails_blob_url(
+      image,
+      host: ENV.fetch("BACKEND_HOST", "http://localhost:3000")
+    )
+    Rails.logger.info "[DEBUG] image_url: #{url}"
     url
-    else
-      nil
-    end
+  else
+    nil
   end
+end
 
 
   validates :title, presence: true
