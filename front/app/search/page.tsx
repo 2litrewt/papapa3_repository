@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { User } from "lucide-react";
 
 // ✅ Recipe 型を定義
 interface Recipe {
@@ -80,9 +81,12 @@ const SearchResultsContent = () => {
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
                   <div>
-                  <img src={imageUrl} alt={recipe.title} width={300} height={200}/></div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
+                  <img 
+                  src={imageUrl} 
+                  alt={recipe.title} className="w-full h-[200px] object-cover rounded"
+                  /></div>
+                    <div className="">
+                      <h3 className="font-semibold text-lg mb-4 mt-4 ">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
                         {/* <div className="flex items-center space-x-2"> */}
                           {/* <Heart className="w-5 h-5" /> */}
@@ -93,9 +97,9 @@ const SearchResultsContent = () => {
                           <span>{recipe.favorites || 0}</span>
                         </div> */}
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-sm">
+                      <div className="grid grid-cols-3 gap-2 mb-4 ml-3">
                         <div className="flex items-center">
-                          <DollarSign className="w-4 h-4 mr-1" />
+                          <span className="mr-1">¥</span>
                           <span>{recipe.price}円</span>
                         </div>
                         <div className="flex items-center">
@@ -103,7 +107,7 @@ const SearchResultsContent = () => {
                           <span>{recipe.cooking_time}分</span>
                         </div>
                         <div className="flex items-center">
-                          <Apple className="w-4 h-4 mr-1" />
+                          <User className="w-4 h-4 mr-1" />
                           <span>P: {totalProtein.toFixed(1)}g C: {totalCarbohydrate.toFixed(1)}g F: {totalFat.toFixed(1)}g</span>
                         </div>
                       </div>
