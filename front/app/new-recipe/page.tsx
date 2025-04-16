@@ -123,31 +123,46 @@ export default function NewRecipe() {
               <label htmlFor="description" className="block mb-1">概要</label>
               <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required />
             </div>
-            {/* 調理手順 */}
-            <div>
-              <label className="block mb-1">調理手順</label>
-              {instructions.map((step, index) => (
-                <div key={index} className="mb-2">
-                  <label className="block text-sm mb-1">手順{index + 1}</label>
-                  <Textarea
-                    value={step}
-                    onChange={(e) => {
-                      const newInstructions = [...instructions];
-                      newInstructions[index] = e.target.value;
-                      setInstructions(newInstructions);
-                    }}
-                    required
-                  />
-                </div>
-              ))}
-                <Button
-                  type="button"
-                  onClick={() => setInstructions([...instructions, ""])}
-                  className="mt-2"
-                >
-                  手順を追加
-                </Button>
-              </div>
+         {/* 調理手順（複数対応・削除ボタン付き） */}
+<div>
+  <label className="block mb-1">調理手順</label>
+  {instructions.map((step, index) => (
+    <div key={index} className="mb-4">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-sm font-medium">手順{index + 1}</span>
+        <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          const updated = instructions.filter((_, i) => i !== index);
+          setInstructions(updated);
+        }}
+        className="text-xs px-2 py-0.5"
+      >
+        ✖
+      </Button>
+      </div>
+        <Textarea
+          value={step}
+          onChange={(e) => {
+            const newInstructions = [...instructions];
+            newInstructions[index] = e.target.value;
+            setInstructions(newInstructions);
+          }}
+          required
+        />
+      </div>
+  ))}
+  <Button
+    type="button"
+    onClick={() => setInstructions([...instructions, ""])}
+    className="mt-2"
+  >
+    手順を追加
+  </Button>
+</div>
+
             {/* 画像 */}
             <div>
               <label htmlFor="image" className="block mb-1">料理画像</label>
