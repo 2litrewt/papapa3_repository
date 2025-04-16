@@ -28,6 +28,7 @@ export default function RecipeDetail() {
 
   // ✅ 環境変数から API のベースURLを取得
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  
 
   useEffect(() => {
     if (!recipeId) return;
@@ -49,11 +50,20 @@ export default function RecipeDetail() {
 
   if (!recipe) return <div className="text-center text-gray-500">読み込み中...</div>;
 
+  const imageUrl = recipe.image_url ?? "/DALL.webp";
+
   return (
     <div className="container mx-auto px-4 py-8">
+  <div className="-mx-4">
+    <img
+      src={imageUrl}
+      alt={`${recipe.title}の画像`}
+      className="w-screen h-[300px] object-cover"
+    />
+  </div>
       <Card>
         <CardContent>
-          <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
+          <h1 className="text-3xl font-bold mt-6 mb-2">{recipe.title}</h1>
           <p className="text-gray-600 mb-4">{recipe.description}</p>
           {/* <p className="text-sm text-gray-500">カテゴリー: {recipe.category_name}</p> */}
           <p className="text-sm text-gray-500">作成者: {recipe.user_name}</p>
