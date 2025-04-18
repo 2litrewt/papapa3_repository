@@ -6,6 +6,9 @@ Rails.application.routes.draw do
 
   # API エンドポイント
   namespace :api do
+    namespace :v1 do
+      get 'ingredients/index'
+    end
     resources :posts, only: [:index] 
     resources :recipes, only: [:index, :show, :search, :create] do
       collection do
