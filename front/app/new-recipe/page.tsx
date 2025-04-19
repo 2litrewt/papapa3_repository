@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from "axios";
+import IngredientSelector from "@/components/IngredientSelector";
+import RecipeIngredientsForm from "@/components/RecipeIngredientsForm";
+
 
 export default function NewRecipe() {
   const [title, setTitle] = useState("");
@@ -100,6 +103,7 @@ export default function NewRecipe() {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">新規レシピ投稿</CardTitle>
+          <RecipeIngredientsForm />
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -118,6 +122,12 @@ export default function NewRecipe() {
                 placeholder="材料ID, 数量 を改行で入力（例: 1, 2）"
               />
             </div>
+
+            <div className="p-6">
+              <h1 className="text-xl font-bold mb-4">レシピを作成</h1>
+              <IngredientSelector />
+            </div>
+
             {/* 概要（description） */}
             <div>
               <label htmlFor="description" className="block mb-1">概要</label>
@@ -174,5 +184,6 @@ export default function NewRecipe() {
         </CardContent>
       </Card>
     </div>
+    
   );
 }
