@@ -85,10 +85,11 @@ export default function NewRecipe() {
   console.log("🍱 材料送信内容:", validFields);
     
     formData.append("recipe[title]", title);
-    formData.append(
-      "recipe[recipe_ingredients_attributes]",
-       JSON.stringify(ingredientFields)
-      );
+    validFields.forEach((field, index) => {
+      formData.append(`recipe[recipe_ingredients_attributes][${index}][ingredient_id]`, String(field.ingredient_id));
+      formData.append(`recipe[recipe_ingredients_attributes][${index}][quantity]`, String(field.quantity));
+    });
+    
     formData.append("recipe[description]", description);
     formData.append(
       "recipe[steps_attributes]",

@@ -100,7 +100,10 @@ export default function RecipeDetail() {
           <h2 className="text-2xl font-semibold my-6">材料</h2>
           <ul className="list-disc list-inside mb-6">
             {recipe.ingredients.map((ingredient, index) => (
-              <li key={index}>{ingredient}</li> // ✅ 文字列なのでそのまま表示
+            <li key={index} className="flex justify-between border-b border-dotted border-gray-300 pb-1">
+              <span>{ingredient.name}</span>
+              <span className="font-medium">{ingredient.quantity}g</span>
+            </li>
             ))}
           </ul>
 
