@@ -79,6 +79,9 @@ export default function NewRecipe() {
     quantity: f.quantity!,
   }));
 
+  console.log("🧪 ingredientFields の中身:", ingredientFields);
+  console.log("🍱 validFields に変換されたもの:", validFields);
+
   console.log("🍱 材料送信内容:", validFields);
     
     formData.append("recipe[title]", title);

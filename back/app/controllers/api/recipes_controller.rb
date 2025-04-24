@@ -208,7 +208,8 @@ end
         :category_id,
         :image,  
         ingredients: [:ingredient_id, :quantity],  
-        steps_attributes: [:step_number, :instruction]  # steps_attributesを許可
+        steps_attributes: [:step_number, :instruction],  # steps_attributesを許可
+        recipe_ingredients_attributes: [:ingredient_id, :quantity]
       )
     end      
   end
