@@ -24,12 +24,29 @@ interface Ingredient {
   fat: number;
 }
 
-export default function IngredientSelector() {
+interface IngredientSelectorProps {
+  fieldId: string;
+  onChange: (value: { ingredientId: number | null; quantity: number | null }) => void;
+}
+
+export default function IngredientSelector({ onChange }: IngredientSelectorProps) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState("");
 
+
+  
+  useEffect(() => {
+    if (selectedIngredient || quantity) {
+      console.log("🍅 通知", selectedIngredient?.id, quantity);
+      onChange({
+        ingredientId: selectedIngredient?.id ?? null,
+        quantity: quantity ? parseFloat(quantity) : null,
+      });
+    }
+  }, [selectedIngredient, quantity]);
+  
 
   useEffect(() => {
     const fetchIngredients = async () => {
