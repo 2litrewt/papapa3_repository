@@ -6,7 +6,11 @@ import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
 
-// ✅ Recipe 型を定義
+interface IngredientWithQuantity {
+  name: string;
+  quantity: number;
+}
+
 interface Recipe {
   id: number;
   title: string;
@@ -16,7 +20,7 @@ interface Recipe {
   category_name: string;
   user_name: string;
   total_nutrition: { protein: number; carbohydrate: number; fat: number };
-  ingredients: string[]; // ✅ 文字列の配列になっている
+  ingredients: IngredientWithQuantity[]; // ✅ 文字列の配列になっている
   steps: { step_number: number; instruction: string }[];
   image_url?: string; 
 }
