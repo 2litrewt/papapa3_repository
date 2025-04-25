@@ -105,7 +105,7 @@ end
 
 
     def show
-      recipe = Recipe.includes(:ingredients, :category, :user, :steps).find_by(id: params[:id])
+      recipe = Recipe.includes(:recipe_ingredients, :ingredients, :category, :user, :steps).find_by(id: params[:id])
     
       if recipe
         total_protein = recipe.ingredients.sum(&:protein)
@@ -127,7 +127,12 @@ end
             carbohydrate: total_carbohydrate,
             fat: total_fat
           },
-          ingredients: recipe.ingredients.pluck(:name)
+          ingredients: recipe.recipe_ingredients.map do |ri|
+            {
+              name: ri.ingredient.name,
+              quantity: ri.quantity
+            }
+          end
         }
       else
         render json: { error: 'Recipe not found' }, status: :not_found
@@ -208,7 +213,8 @@ end
         :category_id,
         :image,  
         ingredients: [:ingredient_id, :quantity],  
-        steps_attributes: [:step_number, :instruction]  # steps_attributesを許可
+        steps_attributes: [:step_number, :instruction],  # steps_attributesを許可
+        recipe_ingredients_attributes: [:ingredient_id, :quantity]
       )
     end      
   end

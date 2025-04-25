@@ -6,21 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from "axios";
+import IngredientSelector from "@/components/IngredientSelector";
+import RecipeIngredientsForm from "@/components/RecipeIngredientsForm";
+
 
 export default function NewRecipe() {
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState<{ ingredient_id: number; quantity: number }[]>([]);
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState<string[]>([""]);
-
   const [image, setImage] = useState<File | null>(null);
-
   const [userId, setUserId] = useState<number>();
   const [categoryId, setCategoryId] = useState<number>(1);
   const [cookingTime, setCookingTime] = useState<number>(30);
   const [price, setPrice] = useState<number>(1000);
-
   const [message, setMessage] = useState("");
+  const [ingredientFields, setIngredientFields] = useState<IngredientInput[]>([]);
+
+  interface IngredientInput {
+    id: string;
+    ingredientId: number | null;
+    quantity: number | null;
+  }
 
   // 画像ファイルが選択されたときに状態を更新
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +58,10 @@ export default function NewRecipe() {
     setIngredients(ingredientsArray);
   };
   
+  useEffect(() => {
+    console.log("📦 現在の ingredientFields:", ingredientFields);
+  }, [ingredientFields]);
+  
 
   // フォーム送信時の処理
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,9 +71,25 @@ export default function NewRecipe() {
       step_number: index + 1,
       instruction: instruction
     }));
+
+    const validFields = ingredientFields
+  .filter((f) => f.ingredientId !== null && f.quantity !== null)
+  .map((f) => ({
+    ingredient_id: f.ingredientId!,
+    quantity: f.quantity!,
+  }));
+
+  console.log("🧪 ingredientFields の中身:", ingredientFields);
+  console.log("🍱 validFields に変換されたもの:", validFields);
+
+  console.log("🍱 材料送信内容:", validFields);
     
     formData.append("recipe[title]", title);
-    formData.append("recipe[ingredients]", JSON.stringify(ingredients)); // JSON配列として送る
+    validFields.forEach((field, index) => {
+      formData.append(`recipe[recipe_ingredients_attributes][${index}][ingredient_id]`, String(field.ingredient_id));
+      formData.append(`recipe[recipe_ingredients_attributes][${index}][quantity]`, String(field.quantity));
+    });
+    
     formData.append("recipe[description]", description);
     formData.append(
       "recipe[steps_attributes]",
@@ -108,21 +135,19 @@ export default function NewRecipe() {
               <label htmlFor="title" className="block mb-1">料理名</label>
               <Input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
-            {/* 材料 */}
-            <div>
-              <label htmlFor="ingredients" className="block mb-1">材料（例: 1, 2）</label>
-              <Textarea
-                id="ingredients"
-                onChange={handleIngredientsChange}
-                required
-                placeholder="材料ID, 数量 を改行で入力（例: 1, 2）"
-              />
-            </div>
+
             {/* 概要（description） */}
             <div>
               <label htmlFor="description" className="block mb-1">概要</label>
               <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required />
             </div>
+
+            <RecipeIngredientsForm 
+             ingredientFields={ingredientFields}
+             setIngredientFields={setIngredientFields}
+            />
+
+            
          {/* 調理手順（複数対応・削除ボタン付き） */}
 <div>
   <label className="block mb-1">調理手順</label>
@@ -174,5 +199,6 @@ export default function NewRecipe() {
         </CardContent>
       </Card>
     </div>
+    
   );
 }
