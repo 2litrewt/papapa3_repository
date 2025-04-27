@@ -76,6 +76,17 @@ recipes_data.each do |data|
     # image カラムへの保存がある場合、ここに image: data[:image] を追加
   )
 
+image_path = Rails.root.join("db", "seed_images", data[:image])
+if File.exist?(image_path)
+  recipe.image.attach(
+    io: File.open(image_path),
+    filename: data[:image]
+  )
+else
+  puts "⚠️ 画像ファイルが存在しません: #{data[:image]}"
+end
+
+
   data[:ingredients].each do |ingredient_name, quantity|
     ingredient = Ingredient.find_by(name: ingredient_name)
     if ingredient.nil?
