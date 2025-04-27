@@ -34,7 +34,8 @@ ingredients_data = [
   { name: "ねぎ", protein: 1, carbohydrate: 7, fat: 0 },
   { name: "じゃがいも", protein: 2, carbohydrate: 17, fat: 0 },
   { name: "塩", protein: 0, carbohydrate: 0, fat: 0 },
-  { name: "味噌", protein: 12, carbohydrate: 26, fat: 6 }
+  { name: "味噌", protein: 12, carbohydrate: 26, fat: 6 },
+  { name: "牛乳", protein: 8, carbohydrate: 5, fat: 8 }
 ]
 
 ingredients = ingredients_data.map { |data| Ingredient.find_or_create_by!(data) }
@@ -44,16 +45,16 @@ recipes_data = [
   { title: "たこ焼き", category: "焼き物", image: "takoyaki.jpg", ingredients: { "小麦粉" => 100, "卵" => 50, "キャベツ" => 50, "タコ" => 50 }, steps: ["生地を作る", "具材を加える", "たこ焼き器で焼く"] },
   { title: "オムライス", category: "ご飯", image: "omurice.jpg", ingredients: { "米" => 150, "鶏肉" => 100, "卵" => 100 }, steps: ["ケチャップライスを作る", "卵で包む", "盛り付ける"] },
   { title: "カツカレー", category: "ご飯", image: "katsu_curry.jpg", ingredients: { "米" => 200, "豚肉" => 150, "小麦粉" => 30 }, steps: ["豚肉を揚げる", "カレーを作る", "盛り付ける"] },
-  { title: "茶碗蒸し", category: "煮物", image: "chawanmushi.jpg", ingredients: { "卵" => 100, "ミルク" => 50, "鶏肉" => 50 }, steps: ["卵液を作る", "具材を入れる", "蒸す"] },
+  { title: "茶碗蒸し", category: "煮物", image: "chawanmushi.jpg", ingredients: { "卵" => 100, "牛乳" => 50, "鶏肉" => 50 }, steps: ["卵液を作る", "具材を入れる", "蒸す"] },
   { title: "寿司", category: "ご飯", image: "sushi.jpg", ingredients: { "米" => 200, "サーモン" => 50, "エビ" => 50 }, steps: ["酢飯を作る", "ネタを切る", "握る"] },
   { title: "餃子", category: "焼き物", image: "gyoza.jpg", ingredients: { "豚肉" => 100, "キャベツ" => 50, "小麦粉" => 30 }, steps: ["具を作る", "包む", "焼く"] },
   { title: "そば", category: "麺", image: "soba.jpg", ingredients: { "そば粉" => 100, "小麦粉" => 30, "水" => 50 }, steps: ["生地を作る", "切る", "茹でる"] },
-  { title: "卵焼き", category: "焼き物", image: "tamagoyaki.jpg", ingredients: { "卵" => 150, "ミルク" => 30, "砂糖" => 10 }, steps: ["卵液を作る", "焼く", "巻く"] },
+  { title: "卵焼き", category: "焼き物", image: "tamagoyaki.jpg", ingredients: { "卵" => 150, "牛乳" => 30, "砂糖" => 10 }, steps: ["卵液を作る", "焼く", "巻く"] },
   { title: "うどん", category: "麺", image: "udon.jpg", ingredients: { "小麦粉" => 150, "水" => 70, "塩" => 5 }, steps: ["生地をこねる", "切る", "茹でる"] },
   { title: "とんかつ", category: "揚げ物", image: "tonkatsu.jpg", ingredients: { "豚肉" => 150, "小麦粉" => 30, "パン粉" => 50 }, steps: ["衣を付ける", "揚げる", "盛り付ける"] },
   { title: "親子丼", category: "ご飯", image: "oyakodon.jpg", ingredients: { "鶏肉" => 100, "卵" => 100, "米" => 150 }, steps: ["鶏肉を炒める", "卵を加える", "ご飯に乗せる"] },
   { title: "肉じゃが", category: "煮物", image: "nikujaga.jpg", ingredients: { "牛ひき肉" => 100, "じゃがいも" => 150, "玉ねぎ" => 100 }, steps: ["肉を炒める", "野菜を煮る", "味を整える"] },
-  { title: "抹茶パフェ", category: "デザート", image: "matcha_parfait.jpg", ingredients: { "ミルク" => 100, "砂糖" => 20, "抹茶パウダー" => 5 }, steps: ["材料を混ぜる", "冷やす", "盛り付ける"] },
+  { title: "抹茶パフェ", category: "デザート", image: "matcha_parfait.jpg", ingredients: { "牛乳" => 100, "砂糖" => 20, "抹茶パウダー" => 5 }, steps: ["材料を混ぜる", "冷やす", "盛り付ける"] },
   { title: "サラダ", category: "サラダ", image: "salad.jpg", ingredients: { "キャベツ" => 50, "トマト" => 30, "きゅうり" => 30 }, steps: ["野菜を切る", "和える", "盛り付ける"] },
   { title: "天ぷら", category: "揚げ物", image: "tempura.jpg", ingredients: { "小麦粉" => 100, "エビ" => 50, "なす" => 30 }, steps: ["衣を作る", "具材を揚げる", "盛り付ける"] },
   { title: "ラーメン", category: "麺", image: "ramen.jpg", ingredients: { "小麦粉" => 150, "鶏肉" => 50, "玉ねぎ" => 30 }, steps: ["麺を茹でる", "スープを作る", "盛り付ける"] },
