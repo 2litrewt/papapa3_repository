@@ -59,6 +59,8 @@ recipes_data = [
 ]
 
 recipes_data.each do |data|
+  puts "Creating recipe: #{data[:title]}"  
+
   recipe = Recipe.create!(
     title: data[:title],
     description: "#{data[:title]}の美味しいレシピです。",
@@ -71,6 +73,9 @@ recipes_data.each do |data|
 
   data[:ingredients].each do |ingredient_name, quantity|
     ingredient = Ingredient.find_by(name: ingredient_name)
+    if ingredient.nil?
+      puts "⚠️ Ingredient not found: #{ingredient_name}"  # ★追加：デバッグ出力
+    end
     RecipeIngredient.create!(recipe: recipe, ingredient: ingredient, quantity: quantity)
   end
 
