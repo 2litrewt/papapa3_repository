@@ -3,6 +3,8 @@ app = "back-main"
 [build]
 dockerfile = "Dockerfile.dev"  # 必要に応じてファイル名を変更
 
+[deploy]		
+release_command = "bundle exec rails db:migrate && bundle exec railsdb:seed"
 
 [env]
 PORT = "3000"
