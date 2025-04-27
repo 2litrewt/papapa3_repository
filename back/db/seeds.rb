@@ -32,6 +32,7 @@ ingredients_data = [
   { name: "なす", protein: 1, carbohydrate: 5, fat: 0 },
   { name: "ねぎ", protein: 1, carbohydrate: 7, fat: 0 },
   { name: "じゃがいも", protein: 2, carbohydrate: 17, fat: 0 },
+  { name: "塩", protein: 0, carbohydrate: 0, fat: 0 },
   { name: "味噌", protein: 12, carbohydrate: 26, fat: 6 }
 ]
 
