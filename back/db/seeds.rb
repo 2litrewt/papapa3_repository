@@ -29,6 +29,7 @@ ingredients_data = [
   { name: "抹茶パウダー", protein: 20, carbohydrate: 30, fat: 5 },
   { name: "トマト", protein: 1, carbohydrate: 5, fat: 0 },
   { name: "きゅうり", protein: 1, carbohydrate: 4, fat: 0 },
+  { name: "米", protein: 7, carbohydrate: 77, fat: 1 },
   { name: "なす", protein: 1, carbohydrate: 5, fat: 0 },
   { name: "ねぎ", protein: 1, carbohydrate: 7, fat: 0 },
   { name: "じゃがいも", protein: 2, carbohydrate: 17, fat: 0 },
