@@ -24,6 +24,7 @@ ingredients_data = [
   { name: "サーモン", protein: 23, carbohydrate: 0, fat: 13 },
   { name: "エビ", protein: 21, carbohydrate: 0, fat: 1 },
   { name: "そば粉", protein: 13, carbohydrate: 57, fat: 3 },
+  { name: "水", protein: 0, carbohydrate: 0, fat: 0 },
   { name: "砂糖", protein: 0, carbohydrate: 100, fat: 0 },
   { name: "抹茶パウダー", protein: 20, carbohydrate: 30, fat: 5 },
   { name: "トマト", protein: 1, carbohydrate: 5, fat: 0 },
