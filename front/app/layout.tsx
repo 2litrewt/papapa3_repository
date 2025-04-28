@@ -2,7 +2,7 @@ import { MenuBar } from "@/components/MenuBar";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
-import { FavoritesProvider } from "@/contexts/FavoritesContext"; // ✅ 追加
+import { FavoritesProvider } from "@/context/FavoritesContext"; // ✅ 追加
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -9,6 +9,9 @@ import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { User } from "lucide-react";
+import { useFavorites } from "@/context/FavoritesContext"; // ✅ 追加
+
+
 
 // ✅ Recipe 型を定義
 interface Recipe {
@@ -33,6 +36,7 @@ const SearchResultsContent = () => {
 
   // ✅ 環境変数から API のベースURLを取得
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  const { addFavorite } = useFavorites();
 
   // ✅ API の URL を作成
   const fetchRecipes = useCallback(async () => {
@@ -71,20 +75,33 @@ const SearchResultsContent = () => {
             const totalProtein = recipe.ingredients.reduce((sum, ing) => sum + (ing.protein || 0), 0);
             const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
             const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
-
-
-            // ✅ `recipe.image` の値を適切に処理
             const imageUrl = recipe.image_url ?? "/DALL.webp";
 
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-0">
-                  <div>
+                  <div　className="relative">
                   <img 
                   src={imageUrl} 
-                  alt={recipe.title} className="w-full h-[200px] object-cover rounded"
-                  /></div>
+                  alt={recipe.title} 
+                  className="w-full h-[200px] object-cover rounded"
+                  />
+                   {/* つくる！ボタン */}
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault(); // リンクの遷移を止める
+                        addFavorite({
+                          id: recipe.id,
+                          title: recipe.title,
+                          imageUrl: imageUrl,
+                        });
+                      }}
+                      className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow"
+                    >
+                      作りたい！
+                    </button>
+                    </div>
                     <div className="">
                       <h3 className="font-semibold text-lg mb-4 mt-4 ">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
