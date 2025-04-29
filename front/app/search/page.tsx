@@ -92,7 +92,7 @@ const SearchResultsContent = () => {
                       onClick={async(e) => {
                         e.preventDefault();
                         try {
-                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
+                        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
                           favorite: {
                             recipe_id: recipe.id,
                             recipe_title: recipe.title,
@@ -106,7 +106,20 @@ const SearchResultsContent = () => {
                             "uid": localStorage.getItem("uid") || "",
                           }
                         });
+
+                        const newAccessToken = response.headers["access-token"]
+                        const newClient = response.headers["client"]
+                        const newUid = response.headers["uid"]
+
+                        if (newAccessToken && newClient && newUid) {
+                          localStorage.setItem("access-token", newAccessToken)
+                          localStorage.setItem("client", newClient)
+                          localStorage.setItem("uid", newUid)
+                        }
+
                         alert("作りたいリストに追加しました！");
+                        console.log("✅ 作りたい登録完了:", response.data)
+
                       } catch (error) {
                         console.error("作りたいリスト追加失敗:", error);
                         alert("追加に失敗しました");
