@@ -89,14 +89,29 @@ const SearchResultsContent = () => {
                   />
                    {/* つくる！ボタン */}
                     <button 
-                      onClick={(e) => {
-                        e.preventDefault(); // リンクの遷移を止める
-                        addFavorite({
-                          id: recipe.id,
-                          title: recipe.title,
-                          imageUrl: imageUrl,
+                      onClick={async(e) => {
+                        e.preventDefault();
+                        try {
+                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
+                          favorite: {
+                            recipe_id: recipe.id,
+                            recipe_title: recipe.title,
+                            recipe_image_url: imageUrl,
+                          }
+                        }, {
+                          headers: {
+                            "Content-Type": "application/json",
+                            "access-token": localStorage.getItem("access-token") || "",
+                            "client": localStorage.getItem("client") || "",
+                            "uid": localStorage.getItem("uid") || "",
+                          }
                         });
-                      }}
+                        alert("作りたいリストに追加しました！");
+                      } catch (error) {
+                        console.error("作りたいリスト追加失敗:", error);
+                        alert("追加に失敗しました");
+                      }
+                    }}
                       className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow"
                     >
                       作りたい！
