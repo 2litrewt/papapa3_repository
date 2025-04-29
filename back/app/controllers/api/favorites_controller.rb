@@ -14,6 +14,12 @@ module Api
       else
         render json: { errors: favorite.errors.full_messages }, status: :unprocessable_entity
       end
+
+    rescue => e
+      Rails.logger.error("🔥 予期せぬエラー: #{e.message}")
+      Rails.logger.error(e.backtrace.join("\n"))
+      render json: { error: "Internal Server Error" }, status: :internal_server_error
+    
     end
 
     private
