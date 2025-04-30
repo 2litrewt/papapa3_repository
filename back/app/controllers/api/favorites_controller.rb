@@ -22,6 +22,16 @@ module Api
     
     end
 
+    def destroy
+      favorite = current_user.favorites.find_by(recipe_id: params[:id])
+      if favorite
+        favorite.destroy
+        head :no_content
+      else
+        render json: { error: "お気に入りが見つかりません" }, status: :not_found
+      end
+    end
+    
     private
 
     def favorite_params

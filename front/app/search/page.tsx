@@ -10,8 +10,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { User } from "lucide-react";
 import { useFavorites } from "@/context/FavoritesContext"; // ✅ 追加
-
-
+import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
 
 // ✅ Recipe 型を定義
 interface Recipe {
@@ -29,10 +28,12 @@ interface Recipe {
 const SearchResultsContent = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const searchParams = useSearchParams();
   const keyword = searchParams.get("query") || "";
   const time = searchParams.get("time");
   const price = searchParams.get("price");
+  
 
   // ✅ 環境変数から API のベースURLを取得
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -61,6 +62,29 @@ const SearchResultsContent = () => {
     fetchRecipes();
   }, [fetchRecipes]);
 
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
+          headers: {
+            "Content-Type": "application/json",
+            "access-token": localStorage.getItem("access-token") || "",
+            "client": localStorage.getItem("client") || "",
+            "uid": localStorage.getItem("uid") || "",
+          }
+        });
+  
+        const ids = response.data.map((fav: { recipe_id: number }) => fav.recipe_id);
+        setFavoriteIds(ids);
+      } catch (err) {
+        console.error("作りたいリスト取得失敗", err);
+      }
+    };
+  
+    fetchFavorites();
+  }, []);
+  
+
   return (
     <div className="container mx-auto px-4 py-8 pt-8">
       {loading ? (
@@ -79,68 +103,19 @@ const SearchResultsContent = () => {
 
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
-                  <CardContent className="p-0">
-                  <div　className="relative">
-                  <img 
-                  src={imageUrl} 
-                  alt={recipe.title} 
-                  className="w-full h-[200px] object-cover rounded"
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
+                <CardContent className="p-0 relative">
+                  <img src={recipe.image_url ?? "/DALL.webp"} alt={recipe.title} className="w-full h-[200px] object-cover rounded" />
+                
+                  <WannaMakeButton
+                    recipeId={recipe.id}
+                    recipeTitle={recipe.title}
+                    imageUrl={recipe.image_url ?? "/DALL.webp"}
+                    isFavorite={favoriteIds.includes(recipe.id)} 
                   />
-                   {/* つくる！ボタン */}
-                    <button 
-                      onClick={async(e) => {
-                        e.preventDefault();
-                        try {
-                        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
-                          favorite: {
-                            recipe_id: recipe.id,
-                            recipe_title: recipe.title,
-                            recipe_image_url: imageUrl,
-                          }
-                        }, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            "access-token": localStorage.getItem("access-token") || "",
-                            "client": localStorage.getItem("client") || "",
-                            "uid": localStorage.getItem("uid") || "",
-                          }
-                        });
-
-                        const newAccessToken = response.headers["access-token"]
-                        const newClient = response.headers["client"]
-                        const newUid = response.headers["uid"]
-
-                        if (newAccessToken && newClient && newUid) {
-                          localStorage.setItem("access-token", newAccessToken)
-                          localStorage.setItem("client", newClient)
-                          localStorage.setItem("uid", newUid)
-                        }
-
-                        alert("作りたいリストに追加しました！");
-                        console.log("✅ 作りたい登録完了:", response.data)
-
-                      } catch (error) {
-                        console.error("作りたいリスト追加失敗:", error);
-                        alert("追加に失敗しました");
-                      }
-                    }}
-                      className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow"
-                    >
-                      作りたい！
-                    </button>
-                    </div>
-                    <div className="">
-                      <h3 className="font-semibold text-lg mb-4 mt-4 ">{recipe.title}</h3>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-4 mt-4">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
-                        {/* <div className="flex items-center space-x-2"> */}
-                          {/* <Heart className="w-5 h-5" /> */}
-                          {/* <span>{recipe.likes || 0}</span> */}
-                        {/* </div> */}
-                        {/* <div className="flex items-center space-x-2">
-                          <Bookmark className="w-5 h-5" />
-                          <span>{recipe.favorites || 0}</span>
-                        </div> */}
                       </div>
                       <div className="grid grid-cols-3 gap-2 mb-4 ml-3">
                         <div className="flex items-center">

@@ -17,7 +17,7 @@ Rails.application.routes.draw do
       end
     end
     
-    resources :favorites, only: [:index, :create]
+    resources :favorites, only: [:index, :create, :destroy]
     resources :categories, only: [:index]
     resources :ingredients, only: [:index]
     resources :tags, only: [:index]
