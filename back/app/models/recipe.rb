@@ -35,6 +35,12 @@ class Recipe < ApplicationRecord
   result
 end
 
+def is_favorite
+  return false unless Current.user
+  Current.user.favorites.exists?(recipe_id: self.id)
+end
+
+
 def image_url
   if image.attached?
     url = Rails.application.routes.url_helpers.rails_blob_url(
