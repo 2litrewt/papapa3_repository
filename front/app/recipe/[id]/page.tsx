@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
+import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
 
 interface IngredientWithQuantity {
   name: string;
@@ -23,28 +24,45 @@ interface Recipe {
   ingredients: IngredientWithQuantity[]; // ✅ 文字列の配列になっている
   steps: { step_number: number; instruction: string }[];
   image_url?: string; 
+  is_favorite?: boolean;
 }
 
 export default function RecipeDetail() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const params = useParams();
   const recipeId = params?.id as string;
+  const [authHeaders, setAuthHeaders] = useState(null);
+  
+    // トークンをロードしてステートに保存
+    useEffect(() => {
+      const token = localStorage.getItem("access-token");
+      const client = localStorage.getItem("client");
+      const uid = localStorage.getItem("uid");
+  
+      if (token && client && uid) {
+        setAuthHeaders({
+          "access-token": token,
+          client,
+          uid,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        });
+      }
+    }, []);
+  
 
   // ✅ 環境変数から API のベースURLを取得
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   
 
   useEffect(() => {
-    if (!recipeId) return;
-    fetchRecipe();
-  }, [recipeId]);
-
+    if (!recipeId ||  !authHeaders) return;
+    
   const fetchRecipe = async () => {
     try {
       const apiUrl = `${API_BASE_URL}/api/recipes/${recipeId}`;
       console.log("🔍 [APIリクエスト] Fetching from:", apiUrl);
-      const response = await axios.get(apiUrl);
-
+      const response = await axios.get(apiUrl, {headers: authHeaders});
       console.log("✅ [APIレスポンス] 取得したレシピ:", response.data);
       setRecipe(response.data);
     } catch (error) {
@@ -52,17 +70,30 @@ export default function RecipeDetail() {
     }
   };
 
+  fetchRecipe();
+},[recipeId, authHeaders]);
+
   if (!recipe) return <div className="text-center text-gray-500">読み込み中...</div>;
 
   const imageUrl = recipe.image_url ?? "/DALL.webp";
+
+  
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="-mx-4">
+      <div className="-mx-4 relative">
         <img
           src={imageUrl}
           alt={`${recipe.title}の画像`}
           className="w-screen h-[300px] object-cover"
         />
+        {/* ボタンを画像の右下に配置 */}
+          <WannaMakeButton
+            recipeId={recipe.id}
+            recipeTitle={recipe.title}
+            imageUrl={recipe.image_url ?? "/DALL.webp"}
+            isFavorite={recipe.is_favorite ?? false}
+          />
+
       </div>
       <Card>
         <CardContent>

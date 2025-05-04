@@ -66,6 +66,7 @@ const SearchResultsContent = () => {
     const fetchFavorites = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
+          
           headers: {
             "Content-Type": "application/json",
             "access-token": localStorage.getItem("access-token") || "",
@@ -112,6 +113,7 @@ const SearchResultsContent = () => {
                     recipeTitle={recipe.title}
                     imageUrl={recipe.image_url ?? "/DALL.webp"}
                     isFavorite={favoriteIds.includes(recipe.id)} 
+                    className="absolute bottom-4 right-4 !top-auto"
                   />
                   <div className="p-4">
                     <h3 className="font-semibold text-lg mb-4 mt-4">{recipe.title}</h3>
