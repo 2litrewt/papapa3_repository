@@ -8,7 +8,7 @@ export function MenuBar() {
   const { user: currentUser, logout } = useAuth()
 
   return (
-    <nav className="bg-gray-100 text-black p-4 shadow-md border-b-2 border-black">
+    <nav className="bg-white text-black p-4 shadow-md border-b border-black rounded-t-xl">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="logo">
           PaPaPa
@@ -16,8 +16,8 @@ export function MenuBar() {
         <nav className="flex items-center gap-4">
         {currentUser ? (
           <>
-            <span className="text-gray-700 dark:text-gray-200">
-              こんにちは、{currentUser.name}さん
+            <span className="px-4 py-2 rounded-md border text-sm">
+              ログイン中：{currentUser.name}さん
             </span>
             <Link href="/new-recipe">
               <Button variant="outline">新規投稿</Button>
