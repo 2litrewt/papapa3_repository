@@ -86,7 +86,7 @@ const SearchResultsContent = () => {
                   alt={recipe.title} className="w-full h-[200px] object-cover rounded"
                   /></div>
                     <div className="">
-                      <h3 className="font-semibold text-lg mb-4 mt-4 ">{recipe.title}</h3>
+                      <h3 className="font-semibold text-lg mb-4 mt-4 ml-4 ">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
                         {/* <div className="flex items-center space-x-2"> */}
                           {/* <Heart className="w-5 h-5" /> */}
@@ -97,18 +97,18 @@ const SearchResultsContent = () => {
                           <span>{recipe.favorites || 0}</span>
                         </div> */}
                       </div>
-                      <div className="grid grid-cols-3 gap-2 mb-4 ml-3">
-                        <div className="flex items-center">
-                          <span className="mr-1">¥</span>
+                      <div className="grid grid-cols-6 gap-2 mb-4 ml-3">
+                        <div className="flex items-center col-span-1">
+                          <span className="mr-1 font font-medium">¥</span>
                           <span>{recipe.price}円</span>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex  items-center col-span-2 pl-4">
                           <Clock className="w-4 h-4 mr-1" />
                           <span>{recipe.cooking_time}分</span>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center col-span-3">
                           <User className="w-4 h-4 mr-1" />
-                          <span>P: {totalProtein.toFixed(1)}g C: {totalCarbohydrate.toFixed(1)}g F: {totalFat.toFixed(1)}g</span>
+                          <span >P: {totalProtein.toFixed(1)}g C: {totalCarbohydrate.toFixed(1)}g F: {totalFat.toFixed(1)}g</span>
                         </div>
                       </div>
                     </div>
