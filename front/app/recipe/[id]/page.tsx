@@ -56,7 +56,7 @@ export default function RecipeDetail() {
 
   const imageUrl = recipe.image_url ?? "/DALL.webp";
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pb-8">
       <div className="-mx-4">
         <img
           src={imageUrl}
@@ -64,12 +64,19 @@ export default function RecipeDetail() {
           className="w-screen h-[300px] object-cover"
         />
       </div>
+  
       <Card>
         <CardContent>
-          <h1 className="text-3xl font-bold mt-6 mb-2">{recipe.title}</h1>
-          <p className="text-gray-600 mb-4">{recipe.description}</p>
-          <p className="text-sm text-gray-500">作成者: {recipe.user_name}</p>
-  
+          <h1 className="text-3xl font-bold under mt-4 mb-8">{recipe.title}</h1>
+
+          <div className="border border-black rounded-md flex items-start space-x-4 p-4 border-b mb-4">
+            <div className="w-10 h-10 rounded-full bg-gray-300"></div>
+            <div>
+            <p className="text-sm text-gray-500 col-span-2 pl-2">レシピ投稿者: {recipe.user_name}さん</p>   
+            <p className="whitespace-pre-wrap bg-[length:100%_1.5em] bg-repeat-y bg-[linear-gradient(to_bottom,transparent 95%,#ccc 95%)] pl-2">{recipe.description}</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="flex items-center">
               <Clock className="w-5 h-5 mr-1" />
@@ -103,6 +110,7 @@ export default function RecipeDetail() {
               </ul>
             </div>
             
+            
             {/* 調理手順部分 */}
             <div>
               <h2 className="text-2xl font-semibold mb-4">調理手順</h2>
@@ -124,3 +132,4 @@ export default function RecipeDetail() {
     </div>
   );
 }
+
