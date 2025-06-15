@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import axios from "axios";
+import apiClient from "@/lib/axios"
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
 import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
@@ -33,36 +33,15 @@ export default function RecipeDetail() {
   const recipeId = params?.id as string;
   const [authHeaders, setAuthHeaders] = useState(null);
   
-    // トークンをロードしてステートに保存
-    useEffect(() => {
-      const token = localStorage.getItem("access-token");
-      const client = localStorage.getItem("client");
-      const uid = localStorage.getItem("uid");
-  
-      if (token && client && uid) {
-        setAuthHeaders({
-          "access-token": token,
-          client,
-          uid,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        });
-      }
-    }, []);
-  
-
-  // ✅ 環境変数から API のベースURLを取得
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-  
 
   useEffect(() => {
     if (!recipeId ||  !authHeaders) return;
     
   const fetchRecipe = async () => {
     try {
-      const apiUrl = `${API_BASE_URL}/api/recipes/${recipeId}`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/recipes/${recipeId}`;
       console.log("🔍 [APIリクエスト] Fetching from:", apiUrl);
-      const response = await axios.get(apiUrl, {headers: authHeaders});
+      const response = await apiClient.get(apiUrl, {headers: authHeaders});
       console.log("✅ [APIレスポンス] 取得したレシピ:", response.data);
       setRecipe(response.data);
     } catch (error) {

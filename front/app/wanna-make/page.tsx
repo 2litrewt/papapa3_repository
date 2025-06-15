@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import axios from "axios"
 import Link from "next/link"
+import apiClient from "@/lib/axios"
 
 interface Favorite {
   id: number
@@ -17,19 +17,8 @@ export default function WannaMakePage() {
 
   useEffect(() => {
     const fetchFavorites = async () => {
-        const headers = {
-            "Content-Type": "application/json",
-            "access-token": localStorage.getItem("access-token") || "",
-            "client": localStorage.getItem("client") || "",
-            "uid": localStorage.getItem("uid") || "",
-          }
-
-          console.log("📦 headers:", headers)
-
           try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
-              headers: headers
-        })
+            const response = await apiClient.get("/api/favorites")
         setFavorites(response.data)
       } catch (error) {
         console.error("❌ 作りたいリスト取得失敗:", error)
