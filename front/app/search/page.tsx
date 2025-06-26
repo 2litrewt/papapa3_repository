@@ -22,7 +22,7 @@ interface Recipe {
   price: number;
   cooking_time: number;
   ingredients: { name: string; protein: number; carbohydrate: number; fat: number }[];
-  image_url?: string; 
+  image_url?: string;
 }
 
 const SearchResultsContent = () => {
@@ -33,7 +33,8 @@ const SearchResultsContent = () => {
   const keyword = searchParams.get("query") || "";
   const time = searchParams.get("time");
   const price = searchParams.get("price");
-  
+
+
 
   // ✅ 環境変数から API のベースURLを取得
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -66,7 +67,7 @@ const SearchResultsContent = () => {
     const fetchFavorites = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
-          
+
           headers: {
             "Content-Type": "application/json",
             "access-token": localStorage.getItem("access-token") || "",
@@ -74,17 +75,17 @@ const SearchResultsContent = () => {
             "uid": localStorage.getItem("uid") || "",
           }
         });
-  
+
         const ids = response.data.map((fav: { recipe_id: number }) => fav.recipe_id);
         setFavoriteIds(ids);
       } catch (err) {
         console.error("作りたいリスト取得失敗", err);
       }
     };
-  
+
     fetchFavorites();
   }, []);
-  
+
 
   return (
     <div className="container mx-auto px-4 py-8 pt-8">
@@ -104,19 +105,20 @@ const SearchResultsContent = () => {
 
             return (
               <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
-                <CardContent className="p-0 relative">
-                  <img src={recipe.image_url ?? "/DALL.webp"} alt={recipe.title} className="w-full h-[200px] object-cover rounded" />
-                
-                  <WannaMakeButton
-                    recipeId={recipe.id}
-                    recipeTitle={recipe.title}
-                    imageUrl={recipe.image_url ?? "/DALL.webp"}
-                    isFavorite={favoriteIds.includes(recipe.id)} 
-                    className="absolute bottom-4 right-4 !top-auto"
-                  />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-4 mt-4">{recipe.title}</h3>
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-0 relative">
+                    <img src={recipe.image_url ?? "/DALL.webp"} alt={recipe.title} className="w-full h-[200px] object-cover rounded" />
+
+                    <WannaMakeButton
+                      recipeId={favorite.recipe_id}
+                      recipeTitle={favorite.recipe_title}
+                      imageUrl={favorite.recipe_image_url}
+                      isFavorite={true}
+                      favoriteId={favorite.id} // お気に入り自体のid
+                      onDeleteFavorite={handleDeleteFavorite}
+                    />
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg mb-4 mt-4">{recipe.title}</h3>
                       <div className="flex justify-between items-center mb-2">
                       </div>
                       <div className="grid grid-cols-3 gap-2 mb-4 ml-3">

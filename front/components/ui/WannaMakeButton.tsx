@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import axios from "axios"
+import apiClient from "@/lib/axios";
 
 interface WannaMakeButtonProps {
   recipeId: number;
@@ -9,44 +10,50 @@ interface WannaMakeButtonProps {
   imageUrl: string;
   isFavorite: boolean;
   className?: string;
+  favoriteId: number;
+  onDeleteFavorite: (favoriteId: number) => void;
 }
 
-function updateAuthTokenFromResponse(response: any) {
-  const newAccessToken = response.headers["access-token"];
-  const newClient = response.headers["client"];
-  const newUid = response.headers["uid"];
-  if (newAccessToken && newClient && newUid) {
-    localStorage.setItem("access-token", newAccessToken);
-    localStorage.setItem("client", newClient);
-    localStorage.setItem("uid", newUid);
-  } else {
+// function updateAuthTokenFromResponse(response: any) {
+//   const newAccessToken = response.headers["access-token"];
+//   const newClient = response.headers["client"];
+//   const newUid = response.headers["uid"];
+//   if (newAccessToken && newClient && newUid) {
+//     localStorage.setItem("access-token", newAccessToken);
+//     localStorage.setItem("client", newClient);
+//     localStorage.setItem("uid", newUid);
+//   } else {
 
-  console.warn("⚠️ トークンの更新情報が含まれていませんでした");
-  }
-}
+//   console.warn("⚠️ トークンの更新情報が含まれていませんでした");
+//   }
+// }
 
-
-
+// お気に入りの追加削除
 export function WannaMakeButton({ 
   recipeId, 
   recipeTitle, 
   imageUrl, 
   isFavorite: isFavoriteProp,
+  favoriteId,
+  onDeleteFavorite,
   className = ""
 }: WannaMakeButtonProps) {
 
   const [isFavorite, setIsFavorite] = useState(isFavoriteProp);
 
+  // クリックイベント
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
+    // tokenの確認
     console.log("📦 現在のトークン", {
       "access-token": localStorage.getItem("access-token"),
       "client": localStorage.getItem("client"),
       "uid": localStorage.getItem("uid")
-
     });
+
     try {
+      // isfaboriteがある時
       if (!isFavorite) {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
           favorite: {
@@ -70,20 +77,14 @@ export function WannaMakeButton({
           "uid": response.headers["uid"],
         });        
 
-        updateAuthTokenFromResponse(response);
+        // updateAuthTokenFromResponse(response);
 
         setIsFavorite(true);
 
       } else {
-        const response =await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites/${recipeId}`, {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "access-token": localStorage.getItem("access-token") || "",
-            "client": localStorage.getItem("client") || "",
-            "uid": localStorage.getItem("uid") || "",
-          }
-        })
+
+        // お気に入り消去
+        const response = await apiClient.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites/${favoriteid}`)
 
         console.log("🌙 POST後トークン", {
           "access-token": response.headers["access-token"],
@@ -91,8 +92,9 @@ export function WannaMakeButton({
           "uid": response.headers["uid"],
         }); 
 
-        updateAuthTokenFromResponse(response);
+        // updateAuthTokenFromResponse(response);
 
+        onDeleteFavorite(favoriteId);
         setIsFavorite(false);
         
       }
@@ -112,3 +114,4 @@ export function WannaMakeButton({
     </button>
   )
 }
+

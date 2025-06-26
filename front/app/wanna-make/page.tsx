@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import apiClient from "@/lib/axios"
+import { Factory } from "lucide-react"
+import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
+
 
 interface Favorite {
   id: number
@@ -14,11 +17,17 @@ interface Favorite {
 export default function WannaMakePage() {
   const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
+  const handleDeleteFavorite = (favoriteId: number) => {
+    setFavorites((prevFavorites) =>
+      prevFavorites.filter((fav) => fav.id !== favoriteId)
+    );
+  };
+
 
   useEffect(() => {
     const fetchFavorites = async () => {
-          try {
-            const response = await apiClient.get("/api/favorites")
+      try {
+        const response = await apiClient.get("/api/favorites")
         setFavorites(response.data)
       } catch (error) {
         console.error("❌ 作りたいリスト取得失敗:", error)
@@ -39,12 +48,21 @@ export default function WannaMakePage() {
         <p className="text-gray-500">まだ作りたいレシピがありません。</p>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {favorites.map((item) => (
-            <li key={item.id} className="border p-4 rounded shadow">
-              <Link href={`/recipe/${item.recipe_id}`}>
-                <img src={item.recipe_image_url} alt={item.recipe_title} className="w-full h-40 object-cover rounded mb-2" />
-                <h3 className="text-lg font-semibold">{item.recipe_title}</h3>
+          {favorites.map((favorite) => (
+            <li key={favorite.id} className="border p-4 rounded shadow">
+              <Link href={`/recipe/${favorite.recipe_id}`}>
+                <img src={favorite.recipe_image_url} alt={favorite.recipe_title} className="w-full h-40 object-cover rounded mb-2" />
+                <h3 className="text-lg font-semibold">{favorite.recipe_title}</h3>
               </Link>
+              <WannaMakeButton
+                recipeId={favorite.recipe_id}
+                recipeTitle={favorite.recipe_title}
+                imageUrl={favorite.recipe_image_url}
+                isFavorite={true}
+                favoriteId={favorite.id} // お気に入り自体のid
+                onDeleteFavorite={handleDeleteFavorite}
+              />
+
             </li>
           ))}
         </ul>
