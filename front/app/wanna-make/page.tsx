@@ -17,11 +17,18 @@ interface Favorite {
 export default function WannaMakePage() {
   const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
-  const handleDeleteFavorite = (favoriteId: number) => {
-    setFavorites((prevFavorites) =>
-      prevFavorites.filter((fav) => fav.id !== favoriteId)
-    );
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  const handleDeleteFavorite = async (favoriteId: number) => {
+    await apiClient.delete(`/api/favorites/${favoriteId}`);
+    await fetchFavorites();
   };
+  const handleAddFavorite = async (recipeId: number) => {
+    await apiClient.post(
+      `${API_BASE_URL}/api/favorites`,
+      { favorite: { recipe_id: recipeId } }
+    );
+    await fetchFavorites();
+    };
 
 
   useEffect(() => {
@@ -60,7 +67,9 @@ export default function WannaMakePage() {
                 imageUrl={favorite.recipe_image_url}
                 isFavorite={true}
                 favoriteId={favorite.id} // お気に入り自体のid
+                onAddFavorite={handleAddFavorite}
                 onDeleteFavorite={handleDeleteFavorite}
+                
               />
 
             </li>

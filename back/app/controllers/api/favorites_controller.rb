@@ -23,7 +23,7 @@ module Api
     end
 
     def destroy
-      favorite = current_user.favorites.find_by(params[:id])
+      favorite = current_user.favorites.find_by(id: params[:id])
       if favorite
         favorite.destroy
         head :no_content

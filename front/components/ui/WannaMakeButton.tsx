@@ -10,8 +10,9 @@ interface WannaMakeButtonProps {
   imageUrl: string;
   isFavorite: boolean;
   className?: string;
-  favoriteId: number;
-  onDeleteFavorite: (favoriteId: number) => void;
+  favoriteId: number | null;
+  onAddFavorite: (recipeId: number) => Promise<void>;
+  onDeleteFavorite: (favoriteId: number) => Promise<void>;
 }
 
 // function updateAuthTokenFromResponse(response: any) {
@@ -36,6 +37,7 @@ export function WannaMakeButton({
   isFavorite: isFavoriteProp,
   favoriteId,
   onDeleteFavorite,
+  onAddFavorite,
   className = ""
 }: WannaMakeButtonProps) {
 
@@ -78,13 +80,20 @@ export function WannaMakeButton({
         });        
 
         // updateAuthTokenFromResponse(response);
-
+        await onAddFavorite(recipeId);
         setIsFavorite(true);
 
       } else {
 
+        console.log("🟡 削除前の favoriteId:", favoriteId);
+
+        if (!favoriteId) {
+          console.error("favoriteId が無効のため削除リクエストを中止");
+          return;
+        }
+
         // お気に入り消去
-        const response = await apiClient.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites/${favoriteid}`)
+        const response = await apiClient.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites/${favoriteId}`)
 
         console.log("🌙 POST後トークン", {
           "access-token": response.headers["access-token"],
@@ -94,7 +103,8 @@ export function WannaMakeButton({
 
         // updateAuthTokenFromResponse(response);
 
-        onDeleteFavorite(favoriteId);
+        console.log("🌟 消去したfavoriteId:", favoriteId);
+        await onDeleteFavorite(favoriteId);
         setIsFavorite(false);
         
       }
