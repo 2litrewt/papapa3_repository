@@ -108,6 +108,8 @@ end
     def show
       Current.user = current_user
       recipe = Recipe.includes(:recipe_ingredients, :ingredients, :category, :user, :steps).find_by(id: params[:id])
+
+      fav = current_user.favorites.find_by(recipe_id: recipe.id)
     
       if recipe
         total_protein = recipe.ingredients.sum(&:protein)
@@ -135,7 +137,8 @@ end
               quantity: ri.quantity
             }
           end,
-          is_favorite: recipe.is_favorite 
+          is_favorite: fav.present?,
+          favorite_id: fav&.id         
         }
       else
         render json: { error: 'Recipe not found' }, status: :not_found

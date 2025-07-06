@@ -1,11 +1,13 @@
+// src/app/search/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, User } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import apiClient from "@/lib/axios";
+import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
 
 interface Recipe {
   id: number;
@@ -24,75 +26,89 @@ interface Favorite {
 export default function SearchPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
 
-  const searchParams = useSearchParams();
-  const keyword = searchParams.get("query") || "";
+  const keyword = useSearchParams().get("query") || "";
 
-  const fetchData = async () => {
+  /** ───────── データ取得 ───────── */
+  const fetchRecipes   = async () => {
     setLoading(true);
-    const [rRes, fRes] = await Promise.all([
-      apiClient.get("/api/recipes", { params: { keyword } }),
-      apiClient.get("/api/favorites"),
-    ]);
-    setRecipes(rRes.data);
-    setFavorites(fRes.data);
+    const res = await apiClient.get<Recipe[]>("/api/recipes", { params: { keyword } });
+    setRecipes(res.data);
     setLoading(false);
   };
 
-  useEffect(() => {
-    void fetchData();
-  }, [keyword]);
-
-  const isFav = (id: number) => favorites.some(f => f.recipe_id === id);
-
-  const toggleFavorite = async (recipeId: number, favId: number | null) => {
-    if (isFav(recipeId) && favId) {
-      await apiClient.delete(`/api/favorites/${favId}`);
-    } else {
-      await apiClient.post("/api/favorites", { favorite: { recipe_id: recipeId } });
-    }
-    // 操作後に一覧を再取得
-    const fRes = await apiClient.get("/api/favorites");
-    setFavorites(fRes.data);
+  const fetchFavorites = async () => {
+    const res = await apiClient.get<Favorite[]>("/api/favorites");
+    setFavorites(res.data);
   };
 
-  if (loading) return <p>読み込み中…</p>;
+  useEffect(() => {
+    void fetchRecipes();
+    void fetchFavorites();
+  }, [keyword]);
+
+  /** ───────── 追加／削除トグル ───────── */
+  const toggleFavorite = async (recipeId: number, favoriteId: number | null) => {
+    if (favoriteId) {
+      // すでにお気に入り → 削除
+      await apiClient.delete(`/api/favorites/${favoriteId}`);
+    } else {
+      // まだお気に入りでない → 追加
+      await apiClient.post("/api/favorites", { favorite: { recipe_id: recipeId } });
+    }
+    await fetchFavorites(); // 一覧を最新化
+  };
+
+  if (loading) return <p className="text-center py-8">読み込み中…</p>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {recipes.map(recipe => {
-        const fav = favorites.find(f => f.recipe_id === recipe.id);
-        const totalProtein = recipe.ingredients.reduce((s, i) => s + i.protein, 0);
-        const totalCarb    = recipe.ingredients.reduce((s, i) => s + i.carbohydrate, 0);
-        const totalFat     = recipe.ingredients.reduce((s, i) => s + i.fat, 0);
+      {recipes.map((r) => {
+        const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
+        const totalP = r.ingredients.reduce((s, i) => s + i.protein, 0);
+        const totalC = r.ingredients.reduce((s, i) => s + i.carbohydrate, 0);
+        const totalF = r.ingredients.reduce((s, i) => s + i.fat, 0);
 
         return (
-          <Card key={recipe.id}>
-            <CardContent className="relative">
+                    <Link
+                      href={`/recipe/${r.id}`}
+                      key={r.id}
+                      className="cursor-pointer"
+                    >
+                     <Card>
+            <CardContent className="relative p-0">
+              <div className="relative w-full h-40">
               <img
-                src={recipe.image_url || "/DALL.webp"}
-                alt={recipe.title}
-                className="w-full h-40 object-cover rounded mb-2"
+                src={r.image_url || "/DALL.webp"}
+                alt={r.title}
+                className="w-full h-full object-cover rounded-t"
               />
-              <h3 className="font-semibold">{recipe.title}</h3>
-              <div className="flex justify-between text-sm mb-2">
-                <span>¥{recipe.price}</span>
-                <span><Clock className="inline w-4 h-4" />{recipe.cooking_time}分</span>
+              {/* ★ お気に入りボタン */}
+              <WannaMakeButton
+                recipeId={r.id}
+                isFavorite={!!fav}
+                favoriteId={fav?.id ?? null}
+                onToggleFavorite={toggleFavorite}
+                className="absolute bottom-2 right-2"
+              />
+                </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">{r.title}</h3>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>¥{r.price}</span>
+                  <span>
+                    <Clock className="inline w-4 h-4" />
+                    {r.cooking_time}分
+                  </span>
+                </div>
+                <div className="text-xs mb-2">
+                  P:{totalP}g C:{totalC}g F:{totalF}g
+                </div>
               </div>
-              <div className="text-xs mb-2">
-                P:{totalProtein}g C:{totalCarb}g F:{totalFat}g
-              </div>
-              <button
-                onClick={() => toggleFavorite(recipe.id, fav?.id || null)}
-                className={`mt-2 px-3 py-1 rounded ${
-                  isFav(recipe.id) ? "bg-red-500 text-white" : "bg-gray-200"
-                }`}
-              >
-                {isFav(recipe.id) ? "作りたいリストから外す" : "作りたい！追加"}
-              </button>
             </CardContent>
           </Card>
+       </Link>
         );
       })}
     </div>
