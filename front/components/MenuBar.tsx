@@ -17,10 +17,13 @@ export function MenuBar() {
         {currentUser ? (
           <>
             <span className="text-gray-700 dark:text-gray-200">
-              こんにちは、{currentUser.name}さん
+              ユーザー：{currentUser.name}
             </span>
             <Link href="/new-recipe">
               <Button variant="outline">新規投稿</Button>
+            </Link>
+            <Link href="/wanna-make">
+              <Button variant="outline">これやる！リスト</Button>
             </Link>
             <Button onClick={logout} variant="destructive">ログアウト</Button>
           </>
@@ -32,6 +35,7 @@ export function MenuBar() {
             <Link href="/register">
               <Button variant="outline">新規登録</Button>
             </Link>
+           
           </>
         )}
       </nav>

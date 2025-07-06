@@ -29,7 +29,7 @@ module Api
         head :no_content
       else
         render json: { error: "お気に入りが見つかりません" }, status: :not_found
-      endC
+      end
     end
     
     private

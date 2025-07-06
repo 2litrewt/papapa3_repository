@@ -69,7 +69,7 @@ export default function WannaMakePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">作りたいリスト</h1>
+      <h1 className="text-2xl font-bold mb-6">これやる！リスト</h1>
 
       {items.length === 0 ? (
         <p className="text-gray-500">まだ作りたいレシピがありません。</p>

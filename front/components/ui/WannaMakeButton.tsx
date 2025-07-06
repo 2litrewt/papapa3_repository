@@ -10,10 +10,7 @@ interface WannaMakeButtonProps {
   className?: string;
 }
 
-/**
- * UI ボタンのみを担当し、
- * 追加・削除の処理は親コンポーネントの onToggleFavorite に任せる
- */
+/** UIボタンのみを担当。追加・削除の処理は親コンポーネント*/
 export function WannaMakeButton({
   recipeId,
   isFavorite,
@@ -41,7 +38,7 @@ export function WannaMakeButton({
         isFavorite ? "bg-orange-400 text-white" : "bg-white text-gray-700"
       }`}
     >
-      {isFavorite ? "作りたい！" : "作りたい！"}
+      {isFavorite ? "これやる！" : "これやる！"}
     </button>
   );
 }
