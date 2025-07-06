@@ -1,133 +1,116 @@
+// src/app/search/page.tsx
 "use client";
 
-import { Suspense, useEffect } from "react";
-import { useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Bookmark, Clock, DollarSign, Apple } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { User } from "lucide-react";
+import apiClient from "@/lib/axios";
+import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
 
-// ✅ Recipe 型を定義
 interface Recipe {
   id: number;
   title: string;
-  image?: string; // ❗ `image` が `undefined` にならないようにオプショナルに変更
-  likes: number;
-  favorites: number;
   price: number;
   cooking_time: number;
-  ingredients: { name: string; protein: number; carbohydrate: number; fat: number }[];
-  image_url?: string; 
+  ingredients: { protein: number; carbohydrate: number; fat: number }[];
+  image_url?: string;
 }
 
-const SearchResultsContent = () => {
+interface Favorite {
+  id: number;
+  recipe_id: number;
+}
+
+export default function SearchPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const searchParams = useSearchParams();
-  const keyword = searchParams.get("query") || "";
-  const time = searchParams.get("time");
-  const price = searchParams.get("price");
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [loading, setLoading]   = useState(true);
 
-  // ✅ 環境変数から API のベースURLを取得
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  const keyword = useSearchParams().get("query") || "";
 
-  // ✅ API の URL を作成
-  const fetchRecipes = useCallback(async () => {
+  /** ───────── データ取得 ───────── */
+  const fetchRecipes   = async () => {
     setLoading(true);
-    try {
-      const apiUrl = `${API_BASE_URL}/api/recipes`;
-      console.log("🔍 [APIリクエスト] Fetching from:", apiUrl);
-
-      const response = await axios.get(apiUrl, {
-        params: { keyword, cooking_time: time, price_range: price },
-      });
-
-      console.log("✅ [APIレスポンス] 取得したレシピ:", response.data); // ✅ ここでレスポンスを確認
-      setRecipes(response.data);
-    } catch (error) {
-      console.error("❌ [エラー] API の取得に失敗しました:", error);
-    }
+    const res = await apiClient.get<Recipe[]>("/api/recipes", { params: { keyword } });
+    setRecipes(res.data);
     setLoading(false);
-  }, [keyword, time, price, API_BASE_URL]);
+  };
+
+  const fetchFavorites = async () => {
+    const res = await apiClient.get<Favorite[]>("/api/favorites");
+    setFavorites(res.data);
+  };
 
   useEffect(() => {
-    fetchRecipes();
-  }, [fetchRecipes]);
+    void fetchRecipes();
+    void fetchFavorites();
+  }, [keyword]);
+
+  /** ───────── 追加／削除トグル ───────── */
+  const toggleFavorite = async (recipeId: number, favoriteId: number | null) => {
+    if (favoriteId) {
+      // すでにお気に入り → 削除
+      await apiClient.delete(`/api/favorites/${favoriteId}`);
+    } else {
+      // まだお気に入りでない → 追加
+      await apiClient.post("/api/favorites", { favorite: { recipe_id: recipeId } });
+    }
+    await fetchFavorites(); // 一覧を最新化
+  };
+
+  if (loading) return <p className="text-center py-8">読み込み中…</p>;
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-8">
-      {loading ? (
-        <p className="text-center text-gray-500 text-lg">検索中...</p>
-      ) : recipes.length === 0 ? (
-        <p className="text-center text-gray-500 text-lg">該当するレシピがありません</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recipes.map((recipe) => {
-            console.log("Recipe Image:", recipe.image); // 画像URLの確認
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      {recipes.map((r) => {
+        const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
+        const totalP = r.ingredients.reduce((s, i) => s + i.protein, 0);
+        const totalC = r.ingredients.reduce((s, i) => s + i.carbohydrate, 0);
+        const totalF = r.ingredients.reduce((s, i) => s + i.fat, 0);
 
-            const totalProtein = recipe.ingredients.reduce((sum, ing) => sum + (ing.protein || 0), 0);
-            const totalCarbohydrate = recipe.ingredients.reduce((sum, ing) => sum + (ing.carbohydrate || 0), 0);
-            const totalFat = recipe.ingredients.reduce((sum, ing) => sum + (ing.fat || 0), 0);
-
-
-            // ✅ `recipe.image` の値を適切に処理
-            const imageUrl = recipe.image_url ?? "/DALL.webp";
-
-            return (
-              <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200">
-                  <CardContent className="p-0">
-                  <div>
-                  <img 
-                  src={imageUrl} 
-                  alt={recipe.title} className="w-full h-[200px] object-cover rounded"
-                  /></div>
-                    <div className="">
-                      <h3 className="font-semibold text-lg mb-4 mt-4 ">{recipe.title}</h3>
-                      <div className="flex justify-between items-center mb-2">
-                        {/* <div className="flex items-center space-x-2"> */}
-                          {/* <Heart className="w-5 h-5" /> */}
-                          {/* <span>{recipe.likes || 0}</span> */}
-                        {/* </div> */}
-                        {/* <div className="flex items-center space-x-2">
-                          <Bookmark className="w-5 h-5" />
-                          <span>{recipe.favorites || 0}</span>
-                        </div> */}
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 mb-4 ml-3">
-                        <div className="flex items-center">
-                          <span className="mr-1">¥</span>
-                          <span>{recipe.price}円</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-1" />
-                          <span>{recipe.cooking_time}分</span>
-                        </div>
-                        <div className="flex items-center">
-                          <User className="w-4 h-4 mr-1" />
-                          <span>P: {totalProtein.toFixed(1)}g C: {totalCarbohydrate.toFixed(1)}g F: {totalFat.toFixed(1)}g</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+        return (
+                    <Link
+                      href={`/recipe/${r.id}`}
+                      key={r.id}
+                      className="cursor-pointer"
+                    >
+                     <Card>
+            <CardContent className="relative p-0">
+              <div className="relative w-full h-40">
+              <img
+                src={r.image_url || "/DALL.webp"}
+                alt={r.title}
+                className="w-full h-full object-cover rounded-t"
+              />
+              {/* ★ お気に入りボタン */}
+              <WannaMakeButton
+                recipeId={r.id}
+                isFavorite={!!fav}
+                favoriteId={fav?.id ?? null}
+                onToggleFavorite={toggleFavorite}
+                className="absolute bottom-2 right-2"
+              />
+                </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">{r.title}</h3>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>¥{r.price}</span>
+                  <span>
+                    <Clock className="inline w-4 h-4" />
+                    {r.cooking_time}分
+                  </span>
+                </div>
+                <div className="text-xs mb-2">
+                  P:{totalP}g C:{totalC}g F:{totalF}g
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+       </Link>
+        );
+      })}
     </div>
-  );
-};
-
-// ✅ Suspense で `useSearchParams()` をラップする
-export default function SearchResults() {
-  return (
-    <Suspense fallback={<p className="text-center text-gray-500">読み込み中...</p>}>
-      <SearchResultsContent />
-    </Suspense>
   );
 }

@@ -15,8 +15,9 @@ Rails.application.routes.draw do
       collection do
         get 'search', to: 'recipes#search'
       end
-    end   
-     
+    end
+    
+    resources :favorites, only: [:index, :create, :destroy]
     resources :categories, only: [:index]
     resources :ingredients, only: [:index]
     resources :tags, only: [:index]

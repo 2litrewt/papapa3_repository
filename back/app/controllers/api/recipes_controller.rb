@@ -2,6 +2,8 @@ module Api
   class RecipesController < ApplicationController
 
     include Rails.application.routes.url_helpers
+    before_action :authenticate_user!, only: [:show]
+
 
     def index
       keyword = params[:keyword]
@@ -103,9 +105,11 @@ end
   }
 end
 
-
     def show
+      Current.user = current_user
       recipe = Recipe.includes(:recipe_ingredients, :ingredients, :category, :user, :steps).find_by(id: params[:id])
+
+      fav = current_user.favorites.find_by(recipe_id: recipe.id)
     
       if recipe
         total_protein = recipe.ingredients.sum(&:protein)
@@ -132,7 +136,9 @@ end
               name: ri.ingredient.name,
               quantity: ri.quantity
             }
-          end
+          end,
+          is_favorite: fav.present?,
+          favorite_id: fav&.id         
         }
       else
         render json: { error: 'Recipe not found' }, status: :not_found
@@ -196,6 +202,11 @@ end
     end
 
     private
+
+    def is_favorite
+      return false unless Current.user
+      Current.user.favorites.exists?(recipe_id: self.id)
+    end    
 
     def set_recipe
       @recipe = Recipe.find(params[:id])

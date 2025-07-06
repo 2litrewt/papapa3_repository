@@ -29,6 +29,11 @@ module App
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # ✅ Cookie & Session を明示的に追加（DeviseTokenAuth対策）
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore
+
+
     # Set timezone
     config.time_zone = "Tokyo"
     config.active_record.default_timezone = :local

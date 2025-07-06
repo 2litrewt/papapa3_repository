@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import axios from "axios";
+import apiClient from "@/lib/axios"
 import Link from "next/link";
 
 // ✅ Recipe 型を定義
@@ -27,7 +27,7 @@ const PostsPageContent = () => {
       try {
         setLoading(true);
         const queryString = searchParams.toString();
-        const response = await axios.get(`/api/recipes${queryString ? `?${queryString}` : ""}`);
+        const response = await apiClient.get(`/api/recipes${queryString ? `?${queryString}` : ""}`);
         setRecipes(response.data);
       } catch {
         setError("エラーが発生しました"); // ✅ `err` を削除し、単純にエラーメッセージをセット
