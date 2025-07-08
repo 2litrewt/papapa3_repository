@@ -17,11 +17,11 @@ const tags = [
   "低糖質", "高タンパク", "低カロリー", "高カロリー", "洋風", "和風", "中華風", "エスニック"
 ];
 
-console.log("🔥 (本番環境) 環境変数チェック: API_BASE_URL は →", process.env.NEXT_PUBLIC_API_BASE_URL || "🚨 未適用 🚨");
+console.log("🔥 (本番環境) 環境変数チェック: API_BASE_URL は →", process.env.NEXT_PUBLIC_API_URL || "🚨 未適用 🚨");
 
 export default function Home() {
   useEffect(() => {
-    console.log("🔥 (useEffect) 環境変数チェック: API_BASE_URL は →", process.env.NEXT_PUBLIC_API_BASE_URL || "🚨 未適用 🚨");
+    console.log("🔥 (useEffect) 環境変数チェック: API_BASE_URL は →", process.env.NEXT_PUBLIC_API_URL || "🚨 未適用 🚨");
   }, []);
 
   return (
