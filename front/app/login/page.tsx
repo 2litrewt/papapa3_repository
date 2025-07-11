@@ -1,3 +1,4 @@
+// app/login/page.tsx
 "use client"
 
 import { useState } from "react"
@@ -6,59 +7,50 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import apiClient from "@/lib/axios"
 
 export default function Login() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const router = useRouter();
+  const [email, setEmail]     = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("'Login attempt'", { email, password })
-  
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sign_in`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      credentials: "omit", // 👈 明示的にCookieや認証情報を送らない
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    })
+    e.preventDefault();
 
-    console.log("レスポンスステータス:", res.status)
-    console.log("access-token:", res.headers.get("access-token"))
-    console.log("client:", res.headers.get("client"))
-    console.log("uid:", res.headers.get("uid"))
+    try {
+      const res = await apiClient.post(
+        "/auth/sign_in",      // 正しいログインパス
+        { email, password },  // ボディはここに渡す
+        { withCredentials: true }
+      );
 
-    for (let [key, value] of res.headers.entries()) {
-      console.log(`${key}: ${value}`)
-    }
-  
-    if (res.ok) {
-      const data = await res.json()
-      const accessToken = res.headers.get("access-token")
-      const client = res.headers.get("client")
-      const uid = res.headers.get("uid")
-  
-      // ここで localStorage に保存
+      console.log("ステータス:", res.status);                       // 200
+      console.log("access-token:", res.headers["access-token"]);     // トークン
+      console.log("client:",       res.headers["client"]);
+      console.log("uid:",          res.headers["uid"]);
+
+      // レスポンスボディは res.data
+      const userData = res.data.data;
+      // トークンヘッダを localStorage に保存
+      const accessToken = res.headers["access-token"];
+      const client      = res.headers["client"];
+      const uid         = res.headers["uid"];
       if (accessToken && client && uid) {
-        localStorage.setItem("access-token", accessToken)
-        localStorage.setItem("client", client)
-        localStorage.setItem("uid", uid)
-        localStorage.setItem("user_id", data.data.id.toString())
-        localStorage.setItem("name", data.data.name) // 名前も保存
-        localStorage.setItem("email", data.data.email)
-        window.location.href = "/" // ホームに遷移
+        localStorage.setItem("access-token", accessToken);
+        localStorage.setItem("client",      client);
+        localStorage.setItem("uid",         uid);
+        localStorage.setItem("user_id",     userData.id.toString());
+        localStorage.setItem("name",        userData.name);
+        localStorage.setItem("email",       userData.email);
       }
-    } else {
-      const error = await res.json()
-      console.error("ログイン失敗:", error)
+
+      // ログイン後トップへ
+      router.push("/");
+    } catch (err: any) {
+      console.error("ログイン失敗:", err.response?.data || err.message);
+      // 必要ならここでエラーメッセージを画面に出す
     }
-  }   
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">

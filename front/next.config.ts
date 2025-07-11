@@ -11,14 +11,14 @@ const nextConfig = {
   },
 
   env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev",
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev",
   },
   eslint: {
     ignoreDuringBuilds: true, // ✅ `yarn build` で ESLint のエラーを無視
   },
 
   images: {
-    domains: ['localhost'], // ← 追加
+    domains: ['localhost'], 
     remotePatterns: [
       {
         protocol: "http",
