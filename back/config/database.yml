@@ -12,8 +12,11 @@ development:
   database: app_development
 
 test:
-  adapter: sqlite3
-  database: db/test.sqlite3
+  adapter: postgresql
+  encoding: unicode
+  database: papapa3_test
+  username: postgres
+  password:
+  host: localhost
   pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
-  timeout: 5000
 
