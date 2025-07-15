@@ -22,10 +22,10 @@ jobs:
         run: |
           cd back
           bundle install --jobs 4 --retry 3
-      - name: Run RSpec
+      - name: Run Rails tests
         run: |
           cd back
-          bundle exec rspec
+          bundle exec rails test
 
   frontend-tests:
     name: Run Next.js tests
