@@ -7,11 +7,9 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  jobs:
   backend-tests:
     name: Run Rails specs
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:14
@@ -25,35 +23,25 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     env:
-      # Rails 7 以降は DATABASE_URL だけでも動く
       DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
-
     steps:
       - uses: actions/checkout@v3
-
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2.2'
           bundler-cache: true
-
       - name: Install dependencies
         working-directory: back
-        run: |
-          bundle install --jobs 4 --retry 3
-
+        run: bundle install --jobs 4 --retry 3
       - name: Prepare test database
         working-directory: back
         run: |
-          # DB 作成・マイグレーション
           bundle exec rails db:create db:migrate RAILS_ENV=test
-
       - name: Run Rails tests
         working-directory: back
-        run: |
-          bundle exec rails test
+        run: bundle exec rails test
 
   frontend-tests:
     name: Run Next.js tests
@@ -71,5 +59,4 @@ jobs:
       - name: Run tests
         run: |
           cd front
-          yarn test
-
+          yarn lint && yarn typecheck && yarn test
