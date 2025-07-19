@@ -112,9 +112,14 @@ export default function NewRecipe() {
       });
       setMessage("レシピが正常にアップロードされました！");
       console.log("送信できたデータ:", response.data);
-    } catch (error: any) {
-      console.error("アップロードエラー:", error.response ? error.response.data : error.message);
-      setMessage("アップロードに失敗しました。コンソールを確認してください。");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("アップロードエラー:", error.response?.data);
+      } else if (error instanceof Error) {
+        console.error("アップロードエラー:", error.message);
+      } else {
+        console.error("アップロードエラー:", error);
+      }
     }
 
     console.log("送信データ:", Object.fromEntries(formData.entries()));

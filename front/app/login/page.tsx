@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import apiClient from "@/lib/axios"
+import axios from "axios";
+
 
 export default function Login() {
   const router = useRouter();
@@ -46,9 +48,14 @@ export default function Login() {
 
       // ログイン後トップへ
       router.push("/");
-    } catch (err: any) {
-      console.error("ログイン失敗:", err.response?.data || err.message);
-      // 必要ならここでエラーメッセージを画面に出す
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("アップロードエラー:", error.response?.data);
+      } else if (error instanceof Error) {
+        console.error("アップロードエラー:", error.message);
+      } else {
+        console.error("アップロードエラー:", error);
+      }
     }
   };
 
@@ -90,4 +97,3 @@ export default function Login() {
     </div>
   )
 }
-
