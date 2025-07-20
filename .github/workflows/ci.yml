@@ -7,42 +7,42 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  # backend-tests:
-  #   name: Run Rails specs
-  #   runs-on: ubuntu-latest
-  #   services:
-  #     postgres:
-  #       image: postgres:14
-  #       env:
-  #         POSTGRES_USER: postgres
-  #         POSTGRES_PASSWORD: password
-  #       ports:
-  #         - 5432:5432
-  #       options: >-
-  #         --health-cmd "pg_isready -U postgres"
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #   env:
-  #     DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Set up Ruby
-  #       uses: ruby/setup-ruby@v1
-  #       with:
-  #         ruby-version: '3.2.2'
-  #         bundler-cache: true
-  #     - name: Install dependencies
-  #       working-directory: back
-  #       run: bundle install --jobs 4 --retry 3
-  #     - name: Prepare test database
-  #       working-directory: back
-  #       run: |
-  #         bundle exec rails db:environment:set RAILS_ENV=test
-  #         bundle exec rails db:schema:load RAILS_ENV=test
-  #     - name: Run Rails tests
-  #       working-directory: back
-  #       run: bundle exec rails test
+  backend-tests:
+    name: Run Rails specs
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.2'
+          bundler-cache: true
+      - name: Install dependencies
+        working-directory: back
+        run: bundle install --jobs 4 --retry 3
+      - name: Prepare test database
+        working-directory: back
+        run: |
+          bundle exec rails db:environment:set RAILS_ENV=test
+          bundle exec rails db:schema:load RAILS_ENV=test
+      - name: Run Rails tests
+        working-directory: back
+        run: bundle exec rails test
 
   frontend-tests:
     name: Run Next.js tests
