@@ -1,9 +1,9 @@
 default: &default
   adapter: postgresql
   encoding: utf8
-  host: db  # `compose.yml` の `db` に一致させる
+  host: db  
   port: 5432
-  username: root  # `docker exec` で接続できた `root` に統一
+  username: root  
   password: password
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
@@ -12,11 +12,5 @@ development:
   database: app_development
 
 test:
-  adapter: postgresql
-  encoding: unicode
+  <<: *default 
   database: papapa3_test
-  username: postgres
-  password:
-  host: localhost
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
-

@@ -2,62 +2,79 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
-  backend-tests:
-    name: Run Rails specs
+  backend:
+    name: Backend (Rails)
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:14
+        image: postgres:16
         env:
-          POSTGRES_USER: postgres
+          POSTGRES_USER: root
           POSTGRES_PASSWORD: password
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres"
+          --health-cmd "pg_isready -U root"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+      DATABASE_URL: postgres://root:password@localhost:5432/papapa3_test
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Ruby
+
+      - name: Set up Ruby & cache gems
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2.2'
           bundler-cache: true
+
       - name: Install dependencies
         working-directory: back
         run: bundle install --jobs 4 --retry 3
+
+      - name: Run RuboCop
+        working-directory: back
+        run: bundle exec rubocop --fail-level=error
+
       - name: Prepare test database
         working-directory: back
-        run: |
-          bundle exec rails db:environment:set RAILS_ENV=test
-          bundle exec rails db:schema:load RAILS_ENV=test
+        run: bundle exec rails db:prepare RAILS_ENV=test
+
       - name: Run Rails tests
         working-directory: back
         run: bundle exec rails test
 
-  frontend-tests:
-    name: Run Next.js tests
+  frontend:
+    name: Frontend (Next.js)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Node.js
+
+      - name: Set up Node.js & cache yarn
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: yarn
+          cache-dependency-path: front/yarn.lock
+
       - name: Install dependencies
-        run: |
-          cd front
-          yarn install
-      - name: Run tests
-        run: |
-          cd front
-          yarn lint && yarn typecheck && yarn test
+        working-directory: front
+        run: yarn install
+
+      - name: Lint
+        working-directory: front
+        run: yarn lint
+
+      - name: Typecheck
+        working-directory: front
+        run: yarn typecheck
+
+      - name: Run Jest tests
+        working-directory: front
+        run: yarn test

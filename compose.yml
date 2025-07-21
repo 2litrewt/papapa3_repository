@@ -38,7 +38,7 @@ services:
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: app_development
+      POSTGRES_DB: papapa3_test
     ports:
       - "5432:5432"
     volumes:
