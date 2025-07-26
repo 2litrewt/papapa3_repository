@@ -2,12 +2,16 @@
 
 one:
   name: MyString
-  email: MyString
+  email: one@example.com
+  provider: email
+  uid: one@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
   profile_image: MyString
 
 two:
   name: MyString
-  email: MyString
+  email: two@example.com
+  provider: email
+  uid: two@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
   profile_image: MyString
