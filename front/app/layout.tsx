@@ -2,7 +2,7 @@ import { MenuBar } from "@/components/MenuBar";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
-import { FavoritesProvider } from "@/context/FavoritesContext"; // ✅ 追加
+import { FavoritesProvider } from "@/context/FavoritesContext"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,8 +19,8 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={inter.className}>
-        <AuthProvider> {/* ✅ 既存 */}
-          <FavoritesProvider> {/* ✅ 新しく包む */}
+        <AuthProvider> 
+          <FavoritesProvider> 
             <MenuBar />
             <main className="min-h-screen bg-white dark:bg-gray-950">
               {children}
