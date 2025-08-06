@@ -1,4 +1,3 @@
-// app/login/page.tsx
 "use client"
 
 import { useState } from "react"
@@ -11,10 +10,12 @@ import apiClient from "@/lib/axios"
 import axios from "axios";
 
 
+
 export default function Login() {
   const router = useRouter();
   const [email, setEmail]     = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,11 +51,11 @@ export default function Login() {
       router.push("/");
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error("アップロードエラー:", error.response?.data);
+       setErrorMessage(error.response?.data.message || "ログインに失敗しました");  
       } else if (error instanceof Error) {
-        console.error("アップロードエラー:", error.message);
+       setErrorMessage(error.message);                                        
       } else {
-        console.error("アップロードエラー:", error);
+       setErrorMessage("予期せぬエラーが発生しました");                         
       }
     }
   };
@@ -66,6 +67,15 @@ export default function Login() {
           <CardTitle className="text-2xl font-bold">ログイン</CardTitle>
         </CardHeader>
         <CardContent>
+        {errorMessage && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="text-red-700 mb-4 bg-white dark:bg-gray-800 p-3 rounded"
+            >
+              {errorMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="block mb-1">メールアドレス</label>
