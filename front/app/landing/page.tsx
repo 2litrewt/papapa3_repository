@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <Hero />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 my-12 px-4">
+      <div className="max-w-screen-xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 my-12">
         <FeatureCard
           icon={<Clock size={48} className="text-orange-500" />}
           title="見てる動画のシークバーで作れるカンタンごはん。"

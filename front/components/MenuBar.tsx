@@ -9,11 +9,11 @@ export function MenuBar() {
   const { user: currentUser, logout } = useAuth()
 
   return (
-    <nav className="bg-gray-100 text-black p-4 shadow-md border-b-2 border-black">
+    <nav className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white p-4 shadow-md border-b-2 border-black dark:border-gray-700">
       <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="logo block">
           <Image
-            src="/logo.png"
+            src="/logo.webp"
             alt="PaPaPa ロゴ"
             width={220}
             height={40}
