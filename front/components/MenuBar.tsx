@@ -13,7 +13,7 @@ export function MenuBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 0);
-    onScroll(); // 初回反映
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -24,6 +24,11 @@ export function MenuBar() {
   border-b-2 border-transparent hover:border-green-600
   transition-colors
 `;
+
+  const ctaLinkClass = `
+    ${navLinkClass}
+    text-gray-800
+  `;
 
   return (
     <nav className={`
@@ -51,20 +56,21 @@ export function MenuBar() {
                 ユーザー：{currentUser.name}
               </span>
               <Link href="/new-recipe" className={navLinkClass}>
-                <Button variant="outline">新規投稿</Button>
+                新規投稿
               </Link>
               <Link href="/wanna-make" className={navLinkClass}>
-                <Button variant="outline">これやる！リスト</Button>
+                これやる！リスト
               </Link>
+              
               <Button onClick={logout} variant="destructive">ログアウト</Button>
             </>
           ) : (
             <>
-              <Link href="/login">
-                <Button variant="default">ログイン</Button>
+              <Link href="/login" className={ctaLinkClass}>
+                ログイン
               </Link>
-              <Link href="/register">
-                <Button variant="outline">新規登録</Button>
+              <Link href="/register" className={ctaLinkClass}>
+                新規登録
               </Link>
 
             </>
