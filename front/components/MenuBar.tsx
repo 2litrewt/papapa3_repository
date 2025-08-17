@@ -35,17 +35,18 @@ export function MenuBar() {
   sticky top-0 z-50 border-b
   ${isScrolled
     ? "bg-gray-50/95 backdrop-blur shadow-md border-gray-200"
-    : "bg-gray-50/80 backdrop-blur-sm shadow border-gray-100"
+    : "bg-gray-50/80 backdrop-blur-sm shadow-sm border-gray-100"
   }
   text-black transition-all duration-300
+  py-0
 `}>
 
-      <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between">
+      <div className="container max-w-screen-xl mx-auto px-4 flex items-center justify-between py-4 md:py-5">
         <Link href="/" className="logo block">
           <Image
             src="/logo.webp"
             alt="PaPaPa ロゴ"
-            width={220}
+            width={180}
             height={40}
           />
         </Link>
