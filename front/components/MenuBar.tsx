@@ -32,16 +32,18 @@ export function MenuBar() {
 
   return (
     <nav className={`
-  sticky top-0 z-50 border-b
+  sticky top-0 z-50
+  rounded-t-xl
+  border-b border-black
   ${isScrolled
-    ? "bg-gray-50/95 backdrop-blur shadow-md border-gray-200"
-    : "bg-gray-50/80 backdrop-blur-sm shadow-sm border-gray-100"
-  }
+        ? "bg-gray-50/95 backdrop-blur shadow-md border-gray-20"
+        : "bg-gray-50/80 backdrop-blur-sm shadow-sm border-black"
+      }
   text-black transition-all duration-300
   py-0
 `}>
 
-      <div className="container max-w-screen-xl mx-auto px-4 flex items-center justify-between py-4 md:py-5">
+      <div className="container max-w-screen-xl mx-auto px-4  flex items-center justify-between py-4 md:py-5">
         <Link href="/" className="logo block">
           <Image
             src="/logo.webp"
@@ -62,7 +64,7 @@ export function MenuBar() {
               <Link href="/wanna-make" className={navLinkClass}>
                 これやる！リスト
               </Link>
-              
+
               <Button onClick={logout} variant="destructive">ログアウト</Button>
             </>
           ) : (
