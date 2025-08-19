@@ -6,7 +6,7 @@ import { Twitter, Instagram, Facebook } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className=" text-black py-8 ">
+    <footer className="bg-gray-100 text-black border border-t-black py-8 rounded-b-xl">
       <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row items-center md:justify-between gap-6 px-4 ">
         {/* サイトマップリンク */}
         <div className="flex flex-col sm:flex-row gap-4 text-sm hover:underline active:text-opacity-80 ">

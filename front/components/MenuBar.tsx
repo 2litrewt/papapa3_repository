@@ -36,9 +36,9 @@ export function MenuBar() {
   rounded-t-xl
   border-b border-black
   ${isScrolled
-        ? "bg-gray-50/95 backdrop-blur shadow-md border-gray-20"
-        : "bg-gray-50/80 backdrop-blur-sm shadow-sm border-black"
-      }
+    ? "bg-gray-50/95 backdrop-blur shadow-md border-gray-20"
+    : "bg-gray-50/80 backdrop-blur-sm shadow-sm border-black"
+  }
   text-black transition-all duration-300
   py-0
 `}>
@@ -64,7 +64,7 @@ export function MenuBar() {
               <Link href="/wanna-make" className={navLinkClass}>
                 これやる！リスト
               </Link>
-
+              
               <Button onClick={logout} variant="destructive">ログアウト</Button>
             </>
           ) : (

@@ -29,7 +29,7 @@ export default function RootLayout({
         <AuthProvider> 
           <FavoritesProvider> 
           <div className="mx-auto max-w-screen-lg min-h-screen flex flex-col
-                            border border-black rounded-xl shadow-sm bg-white">
+                            border border-black rounded-xl shadow-sm bg-white mt-6 mb-6">
 
             <MenuBar />
             <div className=" flex-1 flex flex-col  overflow-hidden">
