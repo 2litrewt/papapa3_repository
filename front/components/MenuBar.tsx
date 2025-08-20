@@ -47,7 +47,7 @@ export function MenuBar() {
         <Link href="/" className="logo block">
           <Image
             src="/logo.webp"
-            alt="PaPaPa ロゴ"
+            alt="PaPaPaロゴ"
             width={180}
             height={40}
           />
