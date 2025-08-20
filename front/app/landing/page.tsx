@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import Hero from "@/components/Hero";
-import Footer from "@/components/Footer";
 import FeatureCard from "@/components/FeatureCard";
 import { Clock, DollarSign, Heart } from "lucide-react";
 
@@ -39,7 +38,6 @@ export default function RootLayout(
     imageAlt="栄養イメージ"
         />
       </div>
-      <Footer />
     </>
   );
 }
