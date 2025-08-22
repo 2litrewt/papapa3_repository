@@ -7,6 +7,8 @@ import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import apiClient from "@/lib/axios";
 import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 interface Recipe {
   id: number;
@@ -27,28 +29,51 @@ export default function SearchInner() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { user: currentUser } = useAuth();
+
   const keyword = useSearchParams().get("query") || "";
 
   // ───────── データ取得 ─────────
   const fetchRecipes = async () => {
     setLoading(true);
+    try {
     const res = await apiClient.get<Recipe[]>("/api/recipes", { params: { keyword } });
     setRecipes(res.data);
+  } finally {
     setLoading(false);
+  }
   };
 
   const fetchFavorites = async () => {
-    const res = await apiClient.get<Favorite[]>("/api/favorites");
-    setFavorites(res.data);
+    if (!currentUser) {
+      setFavorites([]);
+      return;
+    }
+    try {
+      const res = await apiClient.get<Favorite[]>("/api/favorites");
+      setFavorites(res.data);
+    } catch (err) {
+      // --- 401（未認証）は想定内：空配列にして終了 ---
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        setFavorites([]);
+        return;
+      }
+      // --- それ以外は上層で検知できるよう再throw（開発時のため） ---
+      throw err;
+    }
   };
 
   useEffect(() => {
     void fetchRecipes();
     void fetchFavorites();
-  }, [keyword]);
+  }, [keyword, currentUser?.id]);
 
   // ───────── 追加／削除トグル ─────────
   const toggleFavorite = async (recipeId: number, favoriteId: number | null) => {
+    if (!currentUser) {
+      alert("お気に入り機能を使うにはログインが必要です。");
+      return;
+    }
     if (favoriteId) {
       await apiClient.delete(`/api/favorites/${favoriteId}`);
     } else {
