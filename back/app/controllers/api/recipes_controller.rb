@@ -2,7 +2,8 @@ module Api
   class RecipesController < ApplicationController
 
     include Rails.application.routes.url_helpers
-    before_action :authenticate_user!, except: [:index, :show]
+    skip_before_action :authenticate_user!,     only: [:index, :show], raise: false
+    skip_before_action :authenticate_api_user!, only: [:index, :show], raise: false
 
 
     def index
