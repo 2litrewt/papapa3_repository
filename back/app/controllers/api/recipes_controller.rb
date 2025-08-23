@@ -2,7 +2,7 @@ module Api
   class RecipesController < ApplicationController
 
     include Rails.application.routes.url_helpers
-    before_action :authenticate_user!, only: [:show]
+    before_action :authenticate_user!, except: [:index, :show]
 
 
     def index
@@ -109,7 +109,8 @@ end
       Current.user = current_user
       recipe = Recipe.includes(:recipe_ingredients, :ingredients, :category, :user, :steps).find_by(id: params[:id])
 
-      fav = current_user.favorites.find_by(recipe_id: recipe.id)
+      fav = current_user&.favorites&.find_by(recipe_id: recipe.id)
+
     
       if recipe
         total_protein = recipe.ingredients.sum(&:protein)

@@ -66,7 +66,7 @@ export default function SearchInner() {
   useEffect(() => {
     void fetchRecipes();
     void fetchFavorites();
-  }, [keyword, currentUser?.id]);
+  }, [keyword, currentUser]);
 
   // ───────── 追加／削除トグル ─────────
   const toggleFavorite = async (recipeId: number, favoriteId: number | null) => {
