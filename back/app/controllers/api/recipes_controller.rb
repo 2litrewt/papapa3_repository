@@ -1,8 +1,8 @@
 module Api
   class RecipesController < ApplicationController
 
-    include Rails.application.routes.url_helpers
-    before_action :authenticate_user!, only: [:show]
+    skip_before_action :authenticate_user!,     only: [:index, :show], raise: false
+    skip_before_action :authenticate_api_user!, only: [:index, :show], raise: false
 
 
     def index
@@ -109,7 +109,8 @@ end
       Current.user = current_user
       recipe = Recipe.includes(:recipe_ingredients, :ingredients, :category, :user, :steps).find_by(id: params[:id])
 
-      fav = current_user.favorites.find_by(recipe_id: recipe.id)
+      fav = current_user&.favorites&.find_by(recipe_id: recipe.id)
+
     
       if recipe
         total_protein = recipe.ingredients.sum(&:protein)
@@ -199,6 +200,10 @@ end
         Rails.logger.error "Recipe save failed: #{@recipe.errors.full_messages}"  # エラー内容をログに出力
         render json: { errors: @recipe.errors.full_messages }, status: :unprocessable_entity
       end
+
+      skip_before_action :authenticate_user!,     only: [:index, :show], raise: false
+    skip_before_action :authenticate_api_user!, only: [:index, :show], raise: false
+    
     end
 
     private
@@ -227,6 +232,8 @@ end
         steps_attributes: [:step_number, :instruction],  # steps_attributesを許可
         recipe_ingredients_attributes: [:ingredient_id, :quantity]
       )
+
+      
     end      
   end
 end
