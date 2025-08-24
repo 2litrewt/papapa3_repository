@@ -43,7 +43,7 @@ ingredients = ingredients_data.map { |data| Ingredient.find_or_create_by!(data) 
 # 画像名・レシピ内容一覧
 recipes_data = [
   { title: "たこ焼き", category: "焼き物", image: "takoyaki.jpg", ingredients: { "小麦粉" => 100, "卵" => 50, "キャベツ" => 50, "タコ" => 50 }, steps: ["生地を作る", "具材を加える", "たこ焼き器で焼く"] },
-  { title: "オムライス", category: "ご飯", image: "omurice.jpg", ingredients: { "米" => 150, "鶏肉" => 100, "卵" => 100 }, steps: ["ケチャップライスを作る", "卵で包む", "盛り付ける"] },
+  { title: "オムライス", category: "ご飯", image: "omurice.jpg", ingredients: { "米" => 150, "鶏肉" => 100, "卵" => 100 }, steps: ["ケチャップライスを作る", "卵iで包む", "盛り付ける"] },
   { title: "カツカレー", category: "ご飯", image: "katsu_curry.jpg", ingredients: { "米" => 200, "豚肉" => 150, "小麦粉" => 30 }, steps: ["豚肉を揚げる", "カレーを作る", "盛り付ける"] },
   { title: "茶碗蒸し", category: "煮物", image: "chawanmushi.jpg", ingredients: { "卵" => 100, "牛乳" => 50, "鶏肉" => 50 }, steps: ["卵液を作る", "具材を入れる", "蒸す"] },
   { title: "寿司", category: "ご飯", image: "sushi.jpg", ingredients: { "米" => 200, "サーモン" => 50, "エビ" => 50 }, steps: ["酢飯を作る", "ネタを切る", "握る"] },
