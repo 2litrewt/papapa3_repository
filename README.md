@@ -4,7 +4,7 @@
 <br>
 <br>
 <br>
-**アプリURL:** https://papapa3-repository-auth.vercel.app
+**アプリURL:** https://papapa3-repository-auth.vercel.app/landing
 <br>
 <br>
 <br>
