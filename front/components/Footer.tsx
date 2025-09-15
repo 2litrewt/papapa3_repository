@@ -9,11 +9,10 @@ export default function Footer() {
     <footer className="bg-gray-100 text-black border border-t-black py-8 rounded-b-xl">
       <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row items-center md:justify-between gap-6 px-4 ">
         {/* サイトマップリンク */}
-        <div className="flex flex-col sm:flex-row gap-4 text-sm hover:underline active:text-opacity-80 ">
-          <Link href="/">ホーム</Link>
-          <Link href="/landing">LP</Link>
-          <Link href="/recipes">レシピ一覧</Link>
-          <Link href="/about">このサイトについて</Link>
+        <div className="flex flex-col sm:flex-row gap-4 text-sm active:text-opacity-80 ">
+          <Link href="/" className="hover:underline">ホーム</Link>
+          <Link href="/landing" className="hover:underline">LP</Link>
+          <Link href="/search" className="hover:underline">レシピ一覧</Link>
         </div>
         {/* SNSアイコン */}
         <div className="flex items-center gap-4 hover:underline active:text-opacity-80 ">
