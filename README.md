@@ -95,6 +95,47 @@ SECRET_KEY_BASE=your_secret_key_here
 ![0→検索→保存 の一連操作](docs/img/20250725.gif)  
 <br>
 
+
+## 🏗 アーキテクチャ
+
+本プロジェクト「PaPaPa」は、**Next.js（フロントエンド）と Ruby on Rails（バックエンド API）を分離した構成**で構築されたモノレポアプリケーションです。  
+開発環境では Docker Compose でコンテナを統合管理し、本番環境では Vercel（フロント）と Fly.io（バック）で運用しています。
+
+### ⚙️ システム構成図
+
+```mermaid
+graph TD
+  A[ブラウザ] -->|HTTP/HTTPS| B[Next.js (front)]
+  B -->|REST API / JSON| C[Ruby on Rails API (back)]
+  C -->|SQL| D[(PostgreSQL DB)]
+  B -.->|認証トークン| C
+  E[GitHub Actions] -->|CI/CD| B
+  E -->|CI/CD| C
+```
+
+### 📁 ディレクトリ構成と役割
+
+| ディレクトリ     | 主な技術                     | 役割                                                    |
+|----------------|------------------------------|---------------------------------------------------------|
+| `front/`       | Next.js 15 / TypeScript / Tailwind CSS | フロントエンド。レシピ表示・検索・投稿などのUI。AxiosでAPI通信。 |
+| `back/`        | Ruby on Rails 7.1 / PostgreSQL          | バックエンドAPI。レシピ・ユーザー・お気に入り管理。Devise Token Authによる認証。 |
+| `db/` (コンテナ) | PostgreSQL 14               | 永続データ管理（レシピ・ユーザー・お気に入りなど）                    |
+| `/.github/workflows/` | GitHub Actions          | Lint / TypeCheck / Jest テスト → デプロイまでのCI/CDパイプライン             |
+
+### 🔐 認証方式
+
+- `devise_token_auth` を用いたトークンベース認証（ヘッダで `access-token`, `client`, `uid` を送信）
+- フロント側はログイン後に localStorage に保存し、認証付きAPIに自動付与
+
+### 🚀 デプロイ環境
+
+| 対象      | サービス   | 備考                          |
+|-----------|-------------|-----------------------------|
+| フロントエンド | Vercel        | `main` ブランチマージで自動デプロイ |
+| バックエンド | Fly.io         | `back-main` 環境として稼働            |
+| DB         | Fly Postgres    | Rails APIと同一リージョンでホスト |
+
+
 ## Tech Stack
 - **フロントエンド:** Next.js 15 · TypeScript · Tailwind CSS  
 - **バックエンド:** Ruby on Rails 7.1 · PostgreSQL 14  
