@@ -9,6 +9,7 @@ import apiClient from "@/lib/axios";
 import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
+import RecipeCard from "@/components/RecipeCard";
 
 interface Recipe {
   id: number;
@@ -17,6 +18,11 @@ interface Recipe {
   cooking_time: number;
   ingredients: { protein: number; carbohydrate: number; fat: number }[];
   image_url?: string;
+  // カテゴリ名あるいはオブジェクト（Rails API の仕様に合わせて）
+  category?: { name: string } | string;
+  // レシピに紐づくタグの配列。タグオブジェクトまたは文字列の配列を想定。
+  tags?: { name: string }[] | string[];
+  genre?: { name: string }[] | string[];
 }
 
 interface Favorite {
@@ -31,18 +37,66 @@ export default function SearchInner() {
 
   const { user: currentUser } = useAuth();
 
-  const keyword = useSearchParams().get("query") || "";
+  // URL クエリからキーワード、カテゴリ、タグを取得
+  const searchParams = useSearchParams();
+  const keyword = searchParams.get("query") || "";
+  const categoryParam = searchParams.get("category") || "";
+  const tagParam = searchParams.get("tag") || "";
+  const genreParam = searchParams.get("genre") || "";
+
+  type MaybeNamed = string | { name: string };
+  const toName = (v?: MaybeNamed) =>
+    typeof v === "string" ? v : v?.name ?? "";
+  const toNameArray = (v?: MaybeNamed[] | MaybeNamed) =>
+    Array.isArray(v) ? v.map(toName) : v ? [toName(v)] : [];
 
   // ───────── データ取得 ─────────
   const fetchRecipes = async () => {
+    console.time("fetchRecipes"); // 処理全体の計測開始
     setLoading(true);
     try {
-    const res = await apiClient.get<Recipe[]>("/api/recipes", { params: { keyword } });
-    setRecipes(res.data);
-  } finally {
-    setLoading(false);
-  }
+      console.log("[START] params:", {
+        keyword,
+        categoryParam,
+        tagParam,
+        genreParam,
+      });
+  
+      const res = await apiClient.get<Recipe[]>("/api/recipes", {
+        params: {
+          keyword,
+          category: categoryParam || undefined,
+          tag: tagParam || undefined,
+          genre: genreParam || undefined, // ← 誤字に注意
+        },
+      });
+  
+      let list: Recipe[] = res.data;
+      console.log("[API] total:", list.length); // 受信件数
+  
+      if (categoryParam) {
+        list = list.filter((r) => toName(r.category) === categoryParam);
+        console.log("[FILTER] category ->", list.length);
+      }
+      if (genreParam) {
+        const hasGenre = (r: Recipe) => toNameArray(r.genre).includes(genreParam);
+        list = list.filter(hasGenre);
+        console.log("[FILTER] genre ->", list.length);
+      }
+      if (tagParam) {
+        const hasTag = (r: Recipe) => toNameArray(r.tags as any).includes(tagParam);
+        list = list.filter(hasTag);
+        console.log("[FILTER] tag ->", list.length);
+      }
+  
+      setRecipes(list);
+      console.log("[DONE] setRecipes:", list.length); // 最終件数
+    } finally {
+      setLoading(false);
+      console.timeEnd("fetchRecipes"); // 処理全体の計測終了
+    }
   };
+  
 
   const fetchFavorites = async () => {
     if (!currentUser) {
@@ -66,7 +120,7 @@ export default function SearchInner() {
   useEffect(() => {
     void fetchRecipes();
     void fetchFavorites();
-  }, [keyword, currentUser]);
+  }, [keyword, categoryParam, tagParam, genreParam, currentUser]);
 
   // ───────── 追加／削除トグル ─────────
   const toggleFavorite = async (recipeId: number, favoriteId: number | null) => {
@@ -85,49 +139,54 @@ export default function SearchInner() {
   if (loading) return <p className="text-center py-8">読み込み中…</p>;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {recipes.map((r) => {
-        const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
-        const totalP = r.ingredients.reduce((s, i) => s + i.protein, 0);
-        const totalC = r.ingredients.reduce((s, i) => s + i.carbohydrate, 0);
-        const totalF = r.ingredients.reduce((s, i) => s + i.fat, 0);
+    <div className="p-4">
+      {(tagParam || categoryParam) && (
+        <p className="mb-4 inline-block rounded border border-black px-3 py-1 text-sm">
+          {tagParam
+            ? `「${tagParam}」で絞り込み中`
+            : `「${categoryParam}」で絞り込み中`}
+        </p>
+      )}
 
-        return (
-          <Link href={`/recipe/${r.id}`} key={r.id} className="cursor-pointer">
-            <Card>
-              <CardContent className="relative p-0">
-                <div className="relative w-full h-40">
-                  <img
-                    src={r.image_url || "/DALL.webp"}
-                    alt={r.title}
-                    className="w-full h-full object-cover rounded-t"
-                  />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {recipes.map((r) => {
+          const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
+
+          const totalP = r.ingredients.reduce((s, i) => s + i.protein, 0);
+          const totalC = r.ingredients.reduce((s, i) => s + i.carbohydrate, 0);
+          const totalF = r.ingredients.reduce((s, i) => s + i.fat, 0);
+
+          return (
+            <Link href={`/recipe/${r.id}`} key={r.id} className="cursor-pointer">
+              <RecipeCard
+                id={r.id}
+                title={r.title}
+                imageUrl={r.image_url}
+                price={r.price}
+                cookingTime={r.cooking_time}
+                category={r.category}          // 文字列 or {name:string} どちらでもOK
+                genre={Array.isArray(r.genre) ? r.genre[0] : r.genre}                // プロジェクトで使っていれば渡す
+                tags={r.tags}                  // ["#簡単", {name:"#夕食"}] などOK
+
+                rightTopSlot={
                   <WannaMakeButton
                     recipeId={r.id}
                     isFavorite={!!fav}
                     favoriteId={fav?.id ?? null}
                     onToggleFavorite={toggleFavorite}
-                    className="absolute bottom-2 right-2"
                   />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{r.title}</h3>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>¥{r.price}</span>
-                    <span>
-                      <Clock className="inline w-4 h-4" />
-                      {r.cooking_time}分
-                    </span>
-                  </div>
-                  <div className="text-xs mb-2">
+                }
+
+                footerSlot={
+                  <div className="text-xs">
                     P:{totalP}g C:{totalC}g F:{totalF}g
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        );
-      })}
+                }
+              />
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }
