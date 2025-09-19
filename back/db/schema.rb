@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_04_29_040231) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_19_071505) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -64,6 +64,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_29_040231) do
     t.string "recipe_image_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "demo_session_id"
+    t.index ["demo_session_id"], name: "index_favorites_on_demo_session_id"
     t.index ["user_id"], name: "index_favorites_on_user_id"
   end
 
@@ -129,7 +131,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_29_040231) do
     t.datetime "updated_at", null: false
     t.string "image"
     t.jsonb "ingredients", default: [], null: false
+    t.string "demo_session_id"
+    t.jsonb "genre", default: [], null: false
+    t.jsonb "tags", default: [], null: false
     t.index ["category_id"], name: "index_recipes_on_category_id"
+    t.index ["demo_session_id"], name: "index_recipes_on_demo_session_id"
+    t.index ["genre"], name: "index_recipes_on_genre", using: :gin
+    t.index ["tags"], name: "index_recipes_on_tags", using: :gin
     t.index ["user_id"], name: "index_recipes_on_user_id"
   end
 
