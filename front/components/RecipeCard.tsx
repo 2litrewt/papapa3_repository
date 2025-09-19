@@ -6,12 +6,20 @@ import Image from "next/image";
 import {
   Card,
   CardContent,
-} from "@/components/ui/card"; 
+} from "@/components/ui/card";
 
 type MaybeNamed = string | { name: string };
 function toName(v?: MaybeNamed): string {
   if (!v) return "";
   return typeof v === "string" ? v : v.name ?? "";
+}
+
+function toNameArray(v: any): string[] {
+  if (!v) return [];
+  if (Array.isArray(v)) return v.map((i) => (typeof i === "string" ? i : i.name ?? "")).filter(Boolean);
+  if (typeof v === "string") return [v];
+  if (typeof v === "object" && v.name) return [v.name];
+  return [];
 }
 
 export interface RecipeCardProps {
@@ -52,8 +60,9 @@ export default function RecipeCard({
   onImageClickCapture,
 }: RecipeCardProps) {
   const categoryName = toName(category);
-  const genreName = toName(genre);
-  const mainLabel = categoryName || genreName; // どちらかあれば表示
+const genreNames = toNameArray(genre);
+const tagNames = toNameArray(tags);
+  const mainLabel = categoryName || genreNames[0];
 
   return (
     <Card className="overflow-hidden">
@@ -86,6 +95,27 @@ export default function RecipeCard({
         <div className="p-4">
           {/* タイトル */}
           <h3 className="font-semibold text-lg mb-2">{title}</h3>
+
+          <div className="mt-2 space-y-1">
+  {genreNames.length > 0 && (
+    <div className="flex gap-1 flex-wrap">
+      <span className="text-xs text-gray-700 font-semibold">ジャンル:</span>
+      {genreNames.map((g) => (
+        <span key={g} className="text-xs border rounded-full px-2 py-0.5">{g}</span>
+      ))}
+    </div>
+  )}
+
+  {tagNames.length > 0 && (
+    <div className="flex gap-1 flex-wrap">
+      <span className="text-xs text-gray-700 font-semibold">タグ:</span>
+      {tagNames.map((t) => (
+        <span key={t} className="text-xs border rounded-full px-2 py-0.5">{t}</span>
+      ))}
+    </div>
+  )}
+</div>
+
 
           {/* 価格/時間（存在するものだけ） */}
           {(price != null || cookingTime != null) && (
