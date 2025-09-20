@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Clock } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import apiClient from "@/lib/axios";
 import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
 import axios from "axios";
@@ -18,11 +15,8 @@ interface Recipe {
   cooking_time: number;
   ingredients: { protein: number; carbohydrate: number; fat: number }[];
   image_url?: string;
-  // カテゴリ名あるいはオブジェクト（Rails API の仕様に合わせて）
-  category?: { name: string } | string;
-  // レシピに紐づくタグの配列。タグオブジェクトまたは文字列の配列を想定。
-  tags?: { name: string }[] | string[];
-  genre?: { name: string }[] | string[];
+  category?: { name: string } | string; // カテゴリ名 or オブジェクト
+  tags?: { name: string }[] | string[]; // タグの配列（文字列 or オブジェクト）
 }
 
 interface Favorite {
@@ -35,68 +29,56 @@ export default function SearchInner() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
   const { user: currentUser } = useAuth();
 
-  // URL クエリからキーワード、カテゴリ、タグを取得
+  // URLクエリ
   const searchParams = useSearchParams();
   const keyword = searchParams.get("query") || "";
   const categoryParam = searchParams.get("category") || "";
   const tagParam = searchParams.get("tag") || "";
-  const genreParam = searchParams.get("genre") || "";
 
+  // ヘルパ（nameを取り出す）
   type MaybeNamed = string | { name: string };
-  const toName = (v?: MaybeNamed) =>
-    typeof v === "string" ? v : v?.name ?? "";
+  const toName = (v?: MaybeNamed) => (typeof v === "string" ? v : v?.name ?? "");
   const toNameArray = (v?: MaybeNamed[] | MaybeNamed) =>
     Array.isArray(v) ? v.map(toName) : v ? [toName(v)] : [];
 
   // ───────── データ取得 ─────────
   const fetchRecipes = async () => {
-    console.time("fetchRecipes"); // 処理全体の計測開始
+    console.time("fetchRecipes");
     setLoading(true);
     try {
-      console.log("[START] params:", {
-        keyword,
-        categoryParam,
-        tagParam,
-        genreParam,
-      });
-  
+      console.log("[START] params:", { keyword, categoryParam, tagParam });
+
       const res = await apiClient.get<Recipe[]>("/api/recipes", {
         params: {
           keyword,
           category: categoryParam || undefined,
           tag: tagParam || undefined,
-          genre: genreParam || undefined, // ← 誤字に注意
         },
       });
-  
+
       let list: Recipe[] = res.data;
-      console.log("[API] total:", list.length); // 受信件数
-  
+      console.log("[API] total:", list.length);
+
       if (categoryParam) {
         list = list.filter((r) => toName(r.category) === categoryParam);
         console.log("[FILTER] category ->", list.length);
-      }
-      if (genreParam) {
-        const hasGenre = (r: Recipe) => toNameArray(r.genre).includes(genreParam);
-        list = list.filter(hasGenre);
-        console.log("[FILTER] genre ->", list.length);
       }
       if (tagParam) {
         const hasTag = (r: Recipe) => toNameArray(r.tags as any).includes(tagParam);
         list = list.filter(hasTag);
         console.log("[FILTER] tag ->", list.length);
       }
-  
+
       setRecipes(list);
-      console.log("[DONE] setRecipes:", list.length); // 最終件数
+      console.log("[DONE] setRecipes:", list.length);
     } finally {
       setLoading(false);
-      console.timeEnd("fetchRecipes"); // 処理全体の計測終了
+      console.timeEnd("fetchRecipes");
     }
   };
-  
 
   const fetchFavorites = async () => {
     if (!currentUser) {
@@ -107,12 +89,10 @@ export default function SearchInner() {
       const res = await apiClient.get<Favorite[]>("/api/favorites");
       setFavorites(res.data);
     } catch (err) {
-      // --- 401（未認証）は想定内：空配列にして終了 ---
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         setFavorites([]);
         return;
       }
-      // --- それ以外は上層で検知できるよう再throw（開発時のため） ---
       throw err;
     }
   };
@@ -120,9 +100,9 @@ export default function SearchInner() {
   useEffect(() => {
     void fetchRecipes();
     void fetchFavorites();
-  }, [keyword, categoryParam, tagParam, genreParam, currentUser]);
+  }, [keyword, categoryParam, tagParam, currentUser]);
 
-  // ───────── 追加／削除トグル ─────────
+  // ───────── お気に入り トグル ─────────
   const toggleFavorite = async (recipeId: number, favoriteId: number | null) => {
     if (!currentUser) {
       alert("お気に入り機能を使うにはログインが必要です。");
@@ -142,9 +122,7 @@ export default function SearchInner() {
     <div className="p-4">
       {(tagParam || categoryParam) && (
         <p className="mb-4 inline-block rounded border border-black px-3 py-1 text-sm">
-          {tagParam
-            ? `「${tagParam}」で絞り込み中`
-            : `「${categoryParam}」で絞り込み中`}
+          {tagParam ? `「${tagParam}」で絞り込み中` : `「${categoryParam}」で絞り込み中`}
         </p>
       )}
 
@@ -152,23 +130,34 @@ export default function SearchInner() {
         {recipes.map((r) => {
           const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
 
-          const ings = Array.isArray(r.ingredients) ? r.ingredients : []; // （ガード＝安全装置）
+          // 栄養値（未定義ガード）
+          const ings = Array.isArray(r.ingredients) ? r.ingredients : [];
           const totalP = ings.reduce((s, i) => s + (Number(i.protein) ?? 0), 0);
           const totalC = ings.reduce((s, i) => s + (Number(i.carbohydrate) ?? 0), 0);
           const totalF = ings.reduce((s, i) => s + (Number(i.fat) ?? 0), 0);
 
           return (
-            <Link href={`/recipe/${r.id}`} key={r.id} className="cursor-pointer">
+            <div
+              key={r.id}
+              role="link"
+              tabIndex={0}
+              className="cursor-pointer"
+              onClick={() => router.push(`/recipe/${r.id}`)} // カード全体クリックで詳細へ
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/recipe/${r.id}`);
+                }
+              }}
+            >
               <RecipeCard
                 id={r.id}
                 title={r.title}
                 imageUrl={r.image_url}
                 price={r.price}
                 cookingTime={r.cooking_time}
-                category={r.category}          // 文字列 or {name:string} どちらでもOK
-                genre={Array.isArray(r.genre) ? r.genre[0] : r.genre}                // プロジェクトで使っていれば渡す
-                tags={r.tags}                  // ["#簡単", {name:"#夕食"}] などOK
-
+                category={r.category}
+                tags={r.tags}
                 rightTopSlot={
                   <WannaMakeButton
                     recipeId={r.id}
@@ -177,14 +166,13 @@ export default function SearchInner() {
                     onToggleFavorite={toggleFavorite}
                   />
                 }
-
                 footerSlot={
                   <div className="text-xs">
                     P:{totalP}g C:{totalC}g F:{totalF}g
                   </div>
                 }
               />
-            </Link>
+            </div>
           );
         })}
       </div>

@@ -1,19 +1,19 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 type MaybeNamed = string | { name: string };
+
+// toName（名前取り出し：string か {name} を文字列に）
 function toName(v?: MaybeNamed): string {
   if (!v) return "";
   return typeof v === "string" ? v : v.name ?? "";
 }
 
+// toNameArray（配列正規化：文字列/オブジェクト/配列 → 文字列配列）
 function toNameArray(v: any): string[] {
   if (!v) return [];
   if (Array.isArray(v)) return v.map((i) => (typeof i === "string" ? i : i.name ?? "")).filter(Boolean);
@@ -22,27 +22,20 @@ function toNameArray(v: any): string[] {
   return [];
 }
 
+export type RightSlotPlacement = "image" | "title" | "body-bottom";
+
 export interface RecipeCardProps {
   id: number | string;
   title: string;
   imageUrl?: string | null;
   price?: number | null;
   cookingTime?: number | null;
+  category?: MaybeNamed;        // カテゴリ（大分類）
+  tags?: MaybeNamed[];          // タグ（細かな特徴：複数）
 
-  // どちらかがあれば表示（カテゴリ優先・なければジャンル）
-  category?: MaybeNamed;
-  genre?: MaybeNamed;
-
-  // タグは string または {name:string} の配列を想定
-  tags?: MaybeNamed[];
-
-  /** 右上に差し込むボタン等（例：WannaMakeButton） */
-  rightTopSlot?: React.ReactNode;
-
-  /** 下部に差し込む領域（例：栄養PFCの表示など） */
-  footerSlot?: React.ReactNode;
-
-  /** 画像クリックで詳細へ行かせたくない場合などの制御用（必要なら） */
+  rightTopSlot?: React.ReactNode;             // 差し込みボタン（例：WannaMakeButton）
+  rightTopSlotPlacement?: RightSlotPlacement; // 画像 / タイトル行 / 本文右下 から選択（デフォルト: 画像）
+  footerSlot?: React.ReactNode;               // 下部の追加領域
   onImageClickCapture?: (e: React.MouseEvent) => void;
 }
 
@@ -53,21 +46,19 @@ export default function RecipeCard({
   price,
   cookingTime,
   category,
-  genre,
   tags = [],
   rightTopSlot,
+  rightTopSlotPlacement = "image",
   footerSlot,
   onImageClickCapture,
 }: RecipeCardProps) {
+  const router = useRouter();
   const categoryName = toName(category);
-const genreNames = toNameArray(genre);
-const tagNames = toNameArray(tags);
-  const mainLabel = categoryName || genreNames[0];
+  const tagNames = toNameArray(tags);
 
   return (
     <Card className="overflow-hidden">
       <CardContent className="relative p-0">
-
         {/* 画像 */}
         <div className="relative w-full h-40">
           <Image
@@ -76,15 +67,15 @@ const tagNames = toNameArray(tags);
             width={800}
             height={450}
             className="w-full h-full object-cover rounded-t"
+            // priority // 上部で使うカードなら有効化（LCP対策）
             unoptimized
             onClickCapture={onImageClickCapture}
           />
 
-          {/* 右上スロット（例：お気に入りボタン） */}
-          {rightTopSlot && (
+          {/* 配置: 画像右上 */}
+          {rightTopSlot && rightTopSlotPlacement === "image" && (
             <div
-              className="absolute top-2 right-2"
-              // 親のLinkのクリックを拾わせないため
+              className="absolute bottom-2 right-2"
               onClick={(e) => e.stopPropagation()}
             >
               {rightTopSlot}
@@ -92,72 +83,72 @@ const tagNames = toNameArray(tags);
           )}
         </div>
 
+        {/* 本文エリア */}
         <div className="p-4">
-          {/* タイトル */}
-          <h3 className="font-semibold text-lg mb-2">{title}</h3>
+          {/* タイトル行（右側にボタンを置ける） */}
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <h3 className="font-semibold text-lg">{title}</h3>
 
-          <div className="mt-2 space-y-1">
-  {genreNames.length > 0 && (
-    <div className="flex gap-1 flex-wrap">
-      <span className="text-xs text-gray-700 font-semibold">ジャンル:</span>
-      {genreNames.map((g) => (
-        <span key={g} className="text-xs border rounded-full px-2 py-0.5">{g}</span>
-      ))}
-    </div>
-  )}
+            {/* 配置: タイトル行右側 */}
+            {rightTopSlot && rightTopSlotPlacement === "title" && (
+              <div onClick={(e) => e.stopPropagation()}>{rightTopSlot}</div>
+            )}
+          </div>
 
-  {tagNames.length > 0 && (
-    <div className="flex gap-1 flex-wrap">
-      <span className="text-xs text-gray-700 font-semibold">タグ:</span>
-      {tagNames.map((t) => (
-        <span key={t} className="text-xs border rounded-full px-2 py-0.5">{t}</span>
-      ))}
-    </div>
-  )}
-</div>
+          {/* カテゴリ（button + router.push で遷移） */}
+          {categoryName && (
+            <div className="mt-1">
+              <button
+                type="button"
+                aria-label={`カテゴリ ${categoryName} で検索`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/search?category=${encodeURIComponent(categoryName)}`);
+                }}
+                className="px-2 py-1 border border-black rounded text-xs hover:bg-gray-100"
+              >
+                {categoryName}
+              </button>
+            </div>
+          )}
 
+          {/* タグ（button + router.push で遷移） */}
+          {tagNames.length > 0 && (
+            <div className="flex gap-1 flex-wrap mt-2">
+              <span className="text-xs text-gray-700 font-semibold">タグ:</span>
+              {tagNames.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  aria-label={`タグ ${t} で検索`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/search?tag=${encodeURIComponent(t)}`);
+                  }}
+                  className="text-xs border rounded-full px-2 py-0.5 hover:bg-gray-100"
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* 価格/時間（存在するものだけ） */}
           {(price != null || cookingTime != null) && (
-            <div className="flex justify-between text-sm mb-2">
+            <div className="flex justify-between text-sm mt-3">
               <span>{price != null ? `¥${price}` : ""}</span>
               <span>{cookingTime != null ? `${cookingTime}分` : ""}</span>
             </div>
           )}
 
-          {/* カテゴリorジャンル／タグ → /search への導線 */}
-          <div className="flex flex-wrap gap-2 text-xs">
-            {mainLabel && (
-              <Link
-                href={
-                  categoryName
-                    ? `/search?category=${encodeURIComponent(categoryName)}`
-                    : `/search?genre=${encodeURIComponent(genreName)}`
-                }
-                onClick={(e) => e.stopPropagation()}
-                className="px-2 py-1 border border-black rounded hover:bg-gray-100"
-              >
-                {mainLabel}
-              </Link>
-            )}
+          {/* 配置: 本文右下 */}
+          {rightTopSlot && rightTopSlotPlacement === "body-bottom" && (
+            <div className="mt-3 flex justify-end" onClick={(e) => e.stopPropagation()}>
+              {rightTopSlot}
+            </div>
+          )}
 
-            {tags.map((t, i) => {
-              const tagName = toName(t);
-              if (!tagName) return null;
-              return (
-                <Link
-                  key={`${tagName}-${i}`}
-                  href={`/search?tag=${encodeURIComponent(tagName)}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-2 py-1 border border-black rounded hover:bg-gray-100"
-                >
-                  {tagName}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* 任意の下部スロット（例：PFC表示など） */}
+          {/* 下部スロット */}
           {footerSlot && <div className="mt-3">{footerSlot}</div>}
         </div>
       </CardContent>

@@ -52,11 +52,6 @@ module Api
         recipes = recipes.joins(:tags).where(tags: { name: params[:tag] })
       end
     
-      # ジャンルで絞る（genre は jsonb 配列：@>＝「右側を含む」演算子）
-      if params[:genre].present?
-        # 例：genre: ["和風","サラダ"] のような配列カラムに対し、指定ジャンルを含むレコードを取る
-        recipes = recipes.where("recipes.genre @> ?", [params[:genre]].to_json)
-      end
     
       # 栄養タイプ（Ruby側で並び替え）。DBの集計に移すのは後日でOK
       if nutrition_type.present?
@@ -101,8 +96,7 @@ module Api
           price:         r.price,
           # category は「名前」に寄せる（オブジェクトのままにしたいなら {id,name} に戻してOK）
           category:      r.category&.name,
-          # genre は jsonb 配列をそのまま返す（nil/空の吸収）
-          genre:        (r.respond_to?(:genre) ? (r.genre.is_a?(Array) ? r.genre : Array.wrap(r.genre).compact) : []),
+
           # ▼ tags は関連（association＝モデル間のつながり）から名前だけを配列で返す
           tags:         (r.association(:tags).loaded? ? r.tags.map(&:name) : r.tags.pluck(:name)),
           # 画像URL（ActiveStorageのURLヘルパ）
