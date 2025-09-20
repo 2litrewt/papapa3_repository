@@ -6,104 +6,112 @@ module Api
 
 
     def index
-      keyword = params[:keyword]
-      cooking_time = params[:cooking_time] # 調理時間
-      price_range = params[:price_range]  # 価格帯
-      nutrition_type = params[:nutrition_type] # 栄養タイプ
-      sort_by = params[:sortBy] || 'created_at' # ソート項目
-      order = params[:order] || 'asc' # 
-      
+      keyword        = params[:keyword]
+      cooking_time   = params[:cooking_time]     # （調理時間）
+      price_range    = params[:price_range]      # （価格帯）
+      nutrition_type = params[:nutrition_type]   # （栄養タイプ）
+      sort_by        = params[:sortBy] || 'created_at'
+      order          = params[:order]  || 'asc'
+    
+      # 画像URL用のホスト（host＝ドメイン）
       host = Rails.env.production? ? "https://back-main.fly.dev" : "http://localhost:3000"
-
-      # ベースクエリ
-      recipes = Recipe.includes(:ingredients, :category, :user)
-
-
- # キーワード検索
- if keyword.present?
-  recipes = recipes.where('title ILIKE ? OR description ILIKE ?', "%#{keyword}%", "%#{keyword}%")
-end
-
-# 価格帯の条件
-if price_range.present?
-  case price_range
-  when 'low'
-    recipes = recipes.where('price <= ?', 500)
-  when 'medium'
-    recipes = recipes.where('price > ? AND price <= ?', 500, 1000)
-  when 'high'
-    recipes = recipes.where('price > ?', 1000)
-  end
-end
-
-# 調理時間の条件
-if cooking_time.present?
-  case cooking_time
-  when 'short'
-    recipes = recipes.where('cooking_time <= ?', 30)
-  when 'medium'
-    recipes = recipes.where('cooking_time > ? AND cooking_time <= ?', 30, 60)
-  when 'long'
-    recipes = recipes.where('cooking_time > ?', 60)
-  end
-end
-
-# 栄養タイプの条件（Ruby側で並び替え）
-if nutrition_type.present?
-  recipes = recipes.sort_by do |recipe|
-    total_protein = recipe.ingredients.sum(&:protein).to_f
-    total_carbohydrate = recipe.ingredients.sum(&:carbohydrate).to_f
-    total_fat = recipe.ingredients.sum(&:fat).to_f
-
-    Rails.logger.info "Recipe ID: #{recipe.id}, Protein: #{total_protein}, Carbohydrate: #{total_carbohydrate}, Fat: #{total_fat}"
-
-    case nutrition_type
-    when 'high_protein'
-      -total_protein # 多い順（降順）
-    when 'low_carb'
-      total_carbohydrate # 少ない順（昇順）
-    when 'low_fat'
-      total_fat # 少ない順（昇順）
-    else
-      0
+    
+      # ベースクエリ：関連の事前読込（includes＝関連をまとめて取る最適化）
+      recipes = Recipe
+        .includes(:ingredients, :category, :user, :tags)  # ← :tags も追加
+        .references(:category)                             # （orderやwhereでcategoryを使う場合の保険）
+    
+      # --- 絞り込み（DB側） ---
+    
+      # キーワード検索（ILIKE＝大文字小文字を区別しない部分一致）
+      if keyword.present?
+        like = "%#{keyword}%"
+        recipes = recipes.where('recipes.title ILIKE ? OR recipes.description ILIKE ?', like, like)
+      end
+    
+      # 価格帯
+      if price_range.present?
+        case price_range
+        when 'low'    then recipes = recipes.where('recipes.price <= ?', 500)
+        when 'medium' then recipes = recipes.where('recipes.price > ? AND recipes.price <= ?', 500, 1000)
+        when 'high'   then recipes = recipes.where('recipes.price > ?', 1000)
+        end
+      end
+    
+      # 調理時間
+      if cooking_time.present?
+        case cooking_time
+        when 'short'  then recipes = recipes.where('recipes.cooking_time <= ?', 30)
+        when 'medium' then recipes = recipes.where('recipes.cooking_time > ? AND recipes.cooking_time <= ?', 30, 60)
+        when 'long'   then recipes = recipes.where('recipes.cooking_time > ?', 60)
+        end
+      end
+    
+      # タグで絞る（tags は関連：joins＝結合、where＝条件）
+      if params[:tag].present?
+        recipes = recipes.joins(:tags).where(tags: { name: params[:tag] })
+      end
+    
+      # ジャンルで絞る（genre は jsonb 配列：@>＝「右側を含む」演算子）
+      if params[:genre].present?
+        # 例：genre: ["和風","サラダ"] のような配列カラムに対し、指定ジャンルを含むレコードを取る
+        recipes = recipes.where("recipes.genre @> ?", [params[:genre]].to_json)
+      end
+    
+      # 栄養タイプ（Ruby側で並び替え）。DBの集計に移すのは後日でOK
+      if nutrition_type.present?
+        recipes = recipes.to_a.sort_by do |recipe|
+          p_total = recipe.ingredients.sum(&:protein).to_f
+          c_total = recipe.ingredients.sum(&:carbohydrate).to_f
+          f_total = recipe.ingredients.sum(&:fat).to_f
+    
+          case nutrition_type
+          when 'high_protein' then -p_total # 多い順
+          when 'low_carb'     then  c_total # 少ない順
+          when 'low_fat'      then  f_total # 少ない順
+          else 0
+          end
+        end
+      end
+    
+      # 並び替え（order＝昇順/降順）
+      if recipes.is_a?(ActiveRecord::Relation)
+        order_conditions = []
+        order_conditions << "recipes.price #{order.upcase}"         if price_range.present?
+        order_conditions << "recipes.cooking_time #{order.upcase}"  if cooking_time.present?
+        recipes = recipes.order(order_conditions.join(", ")) unless order_conditions.empty?
+      else
+        # Array になっている（上の nutrition_type で sort_by 済み）場合の二次ソート
+        recipes = recipes.sort_by do |recipe|
+          [
+            price_range.present?    ? recipe.price        : 0,
+            cooking_time.present?   ? recipe.cooking_time : 0
+          ]
+        end
+        recipes.reverse! if order == 'desc'
+      end
+    
+      # --- 返却JSON（フロントが読みやすい形に整形） ---
+      render json: Array(recipes).map { |r|
+        {
+          id:            r.id,
+          title:         r.title,
+          description:   r.description,
+          cooking_time:  r.cooking_time,
+          price:         r.price,
+          # category は「名前」に寄せる（オブジェクトのままにしたいなら {id,name} に戻してOK）
+          category:      r.category&.name,
+          # genre は jsonb 配列をそのまま返す（nil/空の吸収）
+          genre:        (r.respond_to?(:genre) ? (r.genre.is_a?(Array) ? r.genre : Array.wrap(r.genre).compact) : []),
+          # ▼ tags は関連（association＝モデル間のつながり）から名前だけを配列で返す
+          tags:         (r.association(:tags).loaded? ? r.tags.map(&:name) : r.tags.pluck(:name)),
+          # 画像URL（ActiveStorageのURLヘルパ）
+          image_url:     (r.image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(r.image, host: host) : nil),
+          # 必要なら ingredients / user を追加（ここでは省略）
+        }
+      }
     end
-  end
-end
-
-# 最終的な並び替えを適用
-if recipes.is_a?(ActiveRecord::Relation)
-  order_conditions = []
-  order_conditions << "price #{order.upcase}" if price_range.present?
-  order_conditions << "cooking_time #{order.upcase}" if cooking_time.present?
-
-  # ActiveRecord::Relation に適用
-  recipes = recipes.order(order_conditions.join(", ")) unless order_conditions.empty?
-else
-  # recipes が Array の場合、sort_by で並び替え
-  recipes = recipes.sort_by do |recipe|
-    [
-      price_range.present? ? recipe.price : 0,
-      cooking_time.present? ? recipe.cooking_time : 0
-    ]
-  end
-  recipes.reverse! if order == 'desc'
-end
-
-  #表示部分
-  render json: recipes.map { |recipe|
-    recipe.as_json(
-      only: [:id, :title, :description, :cooking_time, :price], 
-      include: {
-        category: { only: [:id, :name] },
-        tags: { only: [:id, :name] },
-        ingredients: { only: [:name, :protein, :carbohydrate, :fat] },
-        user: { only: [:id, :name, :profile_image] }
-      } 
-    ).merge(
-      image_url: recipe.image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(recipe.image, host: host) : nil
-    )
-  }
-end
+    
 
     def show
       Current.user = current_user

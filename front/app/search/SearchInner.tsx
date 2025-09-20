@@ -152,9 +152,10 @@ export default function SearchInner() {
         {recipes.map((r) => {
           const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
 
-          const totalP = r.ingredients.reduce((s, i) => s + i.protein, 0);
-          const totalC = r.ingredients.reduce((s, i) => s + i.carbohydrate, 0);
-          const totalF = r.ingredients.reduce((s, i) => s + i.fat, 0);
+          const ings = Array.isArray(r.ingredients) ? r.ingredients : []; // （ガード＝安全装置）
+          const totalP = ings.reduce((s, i) => s + (Number(i.protein) ?? 0), 0);
+          const totalC = ings.reduce((s, i) => s + (Number(i.carbohydrate) ?? 0), 0);
+          const totalF = ings.reduce((s, i) => s + (Number(i.fat) ?? 0), 0);
 
           return (
             <Link href={`/recipe/${r.id}`} key={r.id} className="cursor-pointer">
