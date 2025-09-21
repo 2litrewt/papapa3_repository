@@ -7,6 +7,14 @@ import axios from "axios"; // ← ① axiosを使うなら必須
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, DollarSign, Apple } from "lucide-react";
 import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
+import Link from "next/link";
+
+
+// ★ 文字列 or {name:string} の両対応 (正規化＝形を揃える)
+type MaybeNamed = string | { name: string };
+const toName = (v?: MaybeNamed) => (typeof v === "string" ? v : v?.name ?? "");
+const toNameArray = (v?: MaybeNamed[] | MaybeNamed): string[] =>
+  Array.isArray(v) ? v.map(toName).filter(Boolean) : v ? [toName(v)] : [];
 
 interface Ingredient { name: string; quantity: number }
 interface Recipe {
@@ -22,6 +30,9 @@ interface Recipe {
   image_url?: string;
   is_favorite: boolean;
   favorite_id: number | null;
+  category?: string | { name: string } | null;
+  tags?: (string | { name: string })[] | null;
+
 }
 
 export default function RecipeDetail() {
@@ -84,6 +95,9 @@ export default function RecipeDetail() {
   if (!recipe) return <p className="text-center py-8">レシピが見つかりませんでした。</p>;
 
   const { total_nutrition: n } = recipe;
+  const categoryName = toName(recipe.category ?? undefined);
+  const tagNames = toNameArray(recipe.tags ?? undefined);
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -121,6 +135,36 @@ export default function RecipeDetail() {
           <div className="flex items-center mb-6 text-sm">
             <Apple className="w-4 h-4 mr-2" />
             P:{n.protein}g / C:{n.carbohydrate}g / F:{n.fat}g
+          </div>
+
+          {categoryName && (
+  <div className="flex items-center gap-2 mb-4">
+    <span className="text-xs font-semibold text-gray-700">カテゴリ:</span>
+    <Link
+      href={`/search?category=${encodeURIComponent(categoryName)}`} // （URLエンコード＝安全な文字列化）
+      className="px-2 py-0.5 border rounded text-xs hover:bg-gray-100"
+    >
+      {categoryName}
+    </Link>
+  </div>
+)}
+
+          {/* ★ タグ（0件なら「なし」） */}
+          <div className="flex items-start gap-2 flex-wrap mb-6">
+            <span className="text-xs font-semibold text-gray-700">タグ:</span>
+            {tagNames.length === 0 ? (
+              <span className="text-xs text-gray-500">なし</span>
+            ) : (
+              tagNames.map((t) => (
+                <Link
+                  key={t}
+                  href={`/search?tag=${encodeURIComponent(t)}`}
+                  className="text-xs border rounded-full px-2 py-0.5 hover:bg-gray-100"
+                >
+                  {t}
+                </Link>
+              ))
+            )}
           </div>
 
           {/* 材料部分 */}

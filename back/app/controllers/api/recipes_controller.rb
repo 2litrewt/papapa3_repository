@@ -127,7 +127,8 @@ module Api
           steps: recipe.steps, 
           price: recipe.price, 
           image_url: recipe.image_url,
-          category_name: recipe.category&.name,
+          category:      recipe.category&.name,
+          tags:          (recipe.association(:tags).loaded? ? recipe.tags.map(&:name) : recipe.tags.pluck(:name)),
           user_name: recipe.user&.name,
           total_nutrition: {
             protein: total_protein,
