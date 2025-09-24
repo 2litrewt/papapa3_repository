@@ -62,17 +62,8 @@ export default function SearchInner() {
       let list: Recipe[] = res.data;
       console.log("[API] total:", list.length);
 
-      if (categoryParam) {
-        list = list.filter((r) => toName(r.category) === categoryParam);
-        console.log("[FILTER] category ->", list.length);
-      }
-      if (tagParam) {
-        const hasTag = (r: Recipe) => toNameArray(r.tags as any).includes(tagParam);
-        list = list.filter(hasTag);
-        console.log("[FILTER] tag ->", list.length);
-      }
+      setRecipes(res.data);
 
-      setRecipes(list);
       console.log("[DONE] setRecipes:", list.length);
     } finally {
       setLoading(false);
