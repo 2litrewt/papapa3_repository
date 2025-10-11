@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Clock } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import apiClient from "@/lib/axios";
 import { WannaMakeButton } from "@/components/ui/WannaMakeButton";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
+import RecipeCard from "@/components/RecipeCard";
 
 interface Recipe {
   id: number;
@@ -17,6 +15,8 @@ interface Recipe {
   cooking_time: number;
   ingredients: { protein: number; carbohydrate: number; fat: number }[];
   image_url?: string;
+  category?: { name: string } | string; // カテゴリ名 or オブジェクト
+  tags?: { name: string }[] | string[]; // タグの配列（文字列 or オブジェクト）
 }
 
 interface Favorite {
@@ -29,19 +29,46 @@ export default function SearchInner() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
   const { user: currentUser } = useAuth();
 
-  const keyword = useSearchParams().get("query") || "";
+  // URLクエリ
+  const searchParams = useSearchParams();
+  const keyword = searchParams.get("query") || "";
+  const categoryParam = searchParams.get("category") || "";
+  const tagParam = searchParams.get("tag") || "";
+
+  // ヘルパ（nameを取り出す）
+  type MaybeNamed = string | { name: string };
+  const toName = (v?: MaybeNamed) => (typeof v === "string" ? v : v?.name ?? "");
+  const toNameArray = (v?: MaybeNamed[] | MaybeNamed) =>
+    Array.isArray(v) ? v.map(toName) : v ? [toName(v)] : [];
 
   // ───────── データ取得 ─────────
   const fetchRecipes = async () => {
+    console.time("fetchRecipes");
     setLoading(true);
     try {
-    const res = await apiClient.get<Recipe[]>("/api/recipes", { params: { keyword } });
-    setRecipes(res.data);
-  } finally {
-    setLoading(false);
-  }
+      console.log("[START] params:", { keyword, categoryParam, tagParam });
+
+      const res = await apiClient.get<Recipe[]>("/api/recipes", {
+        params: {
+          keyword,
+          category: categoryParam || undefined,
+          tag: tagParam || undefined,
+        },
+      });
+
+      const list: Recipe[] = res.data;
+      console.log("[API] total:", list.length);
+
+      setRecipes(res.data);
+
+      console.log("[DONE] setRecipes:", list.length);
+    } finally {
+      setLoading(false);
+      console.timeEnd("fetchRecipes");
+    }
   };
 
   const fetchFavorites = async () => {
@@ -53,12 +80,10 @@ export default function SearchInner() {
       const res = await apiClient.get<Favorite[]>("/api/favorites");
       setFavorites(res.data);
     } catch (err) {
-      // --- 401（未認証）は想定内：空配列にして終了 ---
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         setFavorites([]);
         return;
       }
-      // --- それ以外は上層で検知できるよう再throw（開発時のため） ---
       throw err;
     }
   };
@@ -66,9 +91,9 @@ export default function SearchInner() {
   useEffect(() => {
     void fetchRecipes();
     void fetchFavorites();
-  }, [keyword, currentUser]);
+  }, [keyword, categoryParam, tagParam, currentUser]);
 
-  // ───────── 追加／削除トグル ─────────
+  // ───────── お気に入り トグル ─────────
   const toggleFavorite = async (recipeId: number, favoriteId: number | null) => {
     if (!currentUser) {
       alert("お気に入り機能を使うにはログインが必要です。");
@@ -85,49 +110,63 @@ export default function SearchInner() {
   if (loading) return <p className="text-center py-8">読み込み中…</p>;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {recipes.map((r) => {
-        const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
-        const totalP = r.ingredients.reduce((s, i) => s + i.protein, 0);
-        const totalC = r.ingredients.reduce((s, i) => s + i.carbohydrate, 0);
-        const totalF = r.ingredients.reduce((s, i) => s + i.fat, 0);
+    <div className="p-4">
+      {(tagParam || categoryParam) && (
+        <p className="mb-4 inline-block rounded border border-black px-3 py-1 text-sm">
+          {tagParam ? `「${tagParam}」で絞り込み中` : `「${categoryParam}」で絞り込み中`}
+        </p>
+      )}
 
-        return (
-          <Link href={`/recipe/${r.id}`} key={r.id} className="cursor-pointer">
-            <Card>
-              <CardContent className="relative p-0">
-                <div className="relative w-full h-40">
-                  <img
-                    src={r.image_url || "/DALL.webp"}
-                    alt={r.title}
-                    className="w-full h-full object-cover rounded-t"
-                  />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {recipes.map((r) => {
+          const fav = favorites.find((f) => f.recipe_id === r.id) ?? null;
+
+          // 栄養値（未定義ガード）
+          const ings = Array.isArray(r.ingredients) ? r.ingredients : [];
+          const totalP = ings.reduce((s, i) => s + (Number(i.protein) ?? 0), 0);
+          const totalC = ings.reduce((s, i) => s + (Number(i.carbohydrate) ?? 0), 0);
+          const totalF = ings.reduce((s, i) => s + (Number(i.fat) ?? 0), 0);
+
+          return (
+            <div
+              key={r.id}
+              role="link"
+              tabIndex={0}
+              className="cursor-pointer"
+              onClick={() => router.push(`/recipe/${r.id}`)} // カード全体クリックで詳細へ
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/recipe/${r.id}`);
+                }
+              }}
+            >
+              <RecipeCard
+                id={r.id}
+                title={r.title}
+                imageUrl={r.image_url}
+                price={r.price}
+                cookingTime={r.cooking_time}
+                category={r.category}
+                tags={r.tags}
+                rightTopSlot={
                   <WannaMakeButton
                     recipeId={r.id}
                     isFavorite={!!fav}
                     favoriteId={fav?.id ?? null}
                     onToggleFavorite={toggleFavorite}
-                    className="absolute bottom-2 right-2"
                   />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{r.title}</h3>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>¥{r.price}</span>
-                    <span>
-                      <Clock className="inline w-4 h-4" />
-                      {r.cooking_time}分
-                    </span>
-                  </div>
-                  <div className="text-xs mb-2">
+                }
+                footerSlot={
+                  <div className="text-xs">
                     P:{totalP}g C:{totalC}g F:{totalF}g
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        );
-      })}
+                }
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

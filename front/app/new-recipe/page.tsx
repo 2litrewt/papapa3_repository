@@ -1,6 +1,6 @@
 "use client";
 
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,82 @@ export default function NewRecipe() {
   const [price, setPrice] = useState<number>(1000);
   const [message, setMessage] = useState("");
   const [ingredientFields, setIngredientFields] = useState<IngredientInput[]>([]);
+
+  /**
+   * カテゴリ一覧とタグ一覧。ルートページで使用していた定義を
+   * 新規投稿フォームでも利用できるようにここに定義します。
+   * カテゴリは一つだけ選択可能で、タグは最大10個まで選択可能です。
+   */
+  const categoriesList: string[] = [
+    "ご飯",
+    "麺",
+    "煮物",
+    "焼き物",
+    "揚げ物",
+    "サラダ",
+    "スープ",
+    "デザート",
+  ];
+
+  const tagsList: string[] = [
+    "冷たい",
+    "温かい",
+    "しょっぱい",
+    "甘い",
+    "辛い",
+    "さっぱり",
+    "こってり",
+    "ヘルシー",
+    "ボリューミー",
+    "簡単",
+    "時短",
+    "おもてなし",
+    "お弁当",
+    "朝食",
+    "昼食",
+    "夕食",
+    "おつまみ",
+    "パーティー",
+    "おやつ",
+    "ダイエット",
+    "筋トレ",
+    "ベジタリアン",
+    "ヴィーガン",
+    "グルテンフリー",
+    "低糖質",
+    "高タンパク",
+    "低カロリー",
+    "高カロリー",
+    "洋風",
+    "和風",
+    "中華風",
+    "エスニック",
+  ];
+
+  // 選択されたタグを管理。最大10個まで保持する。
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  /**
+   * タグのチェックボックスが変更されたときに呼び出される。
+   * 選択上限（10個）を超えないように制御する。
+   */
+  const handleTagChange = (tag: string, checked: boolean) => {
+    setSelectedTags((prev) => {
+      // チェックが外れた場合はそのタグを取り除く
+      if (!checked) {
+        return prev.filter((t) => t !== tag);
+      }
+      // 10個を超える場合は追加しない
+      if (prev.length >= 10) {
+        return prev;
+      }
+      // 既に含まれていない場合に追加
+      if (!prev.includes(tag)) {
+        return [...prev, tag];
+      }
+      return prev;
+    });
+  };
 
   interface IngredientInput {
     id: string;
@@ -102,6 +178,11 @@ export default function NewRecipe() {
     if (image) {
       formData.append("image", image);
     }
+
+    // 送信するタグを追加。タグ名で送信し、バックエンド側でTagモデルと対応づける。
+    selectedTags.forEach((tag) => {
+      formData.append("recipe[tag_names][]", tag);
+    });
 
     console.log("🔍 送信予定のデータ:", formData);
 
@@ -197,6 +278,40 @@ export default function NewRecipe() {
             <div>
               <label htmlFor="image" className="block mb-1">料理画像</label>
               <Input type="file" id="image" accept="image/*" onChange={handleImageChange}  />
+            </div>
+
+            {/* カテゴリ選択 */}
+            <div>
+              <label className="block mb-1">カテゴリ</label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(Number(e.target.value))}
+                className="w-full border border-black p-2 rounded"
+              >
+                {categoriesList.map((cat, idx) => (
+                  <option value={idx + 1} key={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* タグ選択（最大10個まで） */}
+            <div>
+              <label className="block mb-1">タグ（最大10個）</label>
+              <div className="flex flex-wrap gap-2">
+                {tagsList.map((tag) => (
+                  <label key={tag} className="flex items-center space-x-1 text-sm">
+                    <input
+                      type="checkbox"
+                      value={tag}
+                      checked={selectedTags.includes(tag)}
+                      onChange={(e) => handleTagChange(tag, e.target.checked)}
+                    />
+                    <span>{tag}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <Button type="submit" className="w-full">投稿する</Button>
           </form>
