@@ -14,17 +14,20 @@ module Api
     
       host = Rails.env.production? ? "https://back-main.fly.dev" : "http://localhost:3000"
     
-      # ベースクエリ（カテゴリとタグも includes しておく）
-      recipes = Recipe.includes(:ingredients, :category, :user, :tags)
-    
-      # 🟢 ここに追加（カテゴリ & タグ検索）
-      if params[:category].present?
-        recipes = recipes.joins(:category).where(categories: { name: params[:category] })
-      end
-    
-      if params[:tag].present?
-        recipes = recipes.joins(:tags).where(tags: { name: params[:tag] }).distinct
-      end
+      # ベースクエリ
+recipes = Recipe.includes(:ingredients, :category, :user, :tags)
+
+# カテゴリで絞り込み（name一致）
+if params[:category].present?
+  recipes = recipes.joins(:category).where(categories: { name: params[:category] })
+end
+
+# タグで絞り込み（id か name の“来た方だけ”使う）
+if params[:tag].present?
+  recipes = recipes.joins(:tags).where('tags.name = ?', params[:tag].to_s.strip).distinct
+end
+   
+      
     
       # 以降は既存の条件（keyword, price_range, cooking_time など）
       if keyword.present?
