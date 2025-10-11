@@ -14,9 +14,16 @@ function toName(v?: MaybeNamed): string {
 }
 
 // toNameArray（配列正規化：文字列/オブジェクト/配列 → 文字列配列）
-function toNameArray(v: any): string[] {
+type NameLike = string | { name?: string };
+
+// 引数 v は undefined/null もあり得るので optional に
+function toNameArray(v?: NameLike | NameLike[]): string[] {
   if (!v) return [];
-  if (Array.isArray(v)) return v.map((i) => (typeof i === "string" ? i : i.name ?? "")).filter(Boolean);
+  if (Array.isArray(v)) {
+    return v
+      .map((i) => (typeof i === "string" ? i : i.name ?? ""))
+      .filter(Boolean);
+  }
   if (typeof v === "string") return [v];
   if (typeof v === "object" && v.name) return [v.name];
   return [];
@@ -123,6 +130,7 @@ export default function RecipeCard({
                   aria-label={`タグ ${t} で検索`}
                   onClick={(e) => {
                     e.stopPropagation();
+                    console.log("[TAG CLICK]", t);
                     router.push(`/search?tag=${encodeURIComponent(t)}`);
                   }}
                   className="text-xs border rounded-full px-2 py-0.5 hover:bg-gray-100"

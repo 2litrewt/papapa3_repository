@@ -59,7 +59,7 @@ export default function SearchInner() {
         },
       });
 
-      let list: Recipe[] = res.data;
+      const list: Recipe[] = res.data;
       console.log("[API] total:", list.length);
 
       setRecipes(res.data);
