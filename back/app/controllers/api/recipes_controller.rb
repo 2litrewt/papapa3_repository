@@ -104,54 +104,65 @@ end
 
 
     def create
-      Rails.logger.debug "受け取った params: #{params.inspect}"
-  
-      # 1) ネスト属性＋基本項目で初期化（ingredientsはネストで受けるのでOK）
+      Rails.logger.info "[Recipes#create] params: #{params.to_unsafe_h.slice('recipe','image')}"
+
+      # 1) ネスト属性込みで初期化（:image は後で attach）
       @recipe = Recipe.new(recipe_params)
-  
-      # 2) steps_attributes が JSON 文字列で来た場合に対応
-      if params[:recipe][:steps_attributes].is_a?(String)
+
+      # 2) steps_attributes が JSON文字列で来る場合 ⇒ パースして上書き
+      raw_steps = params.dig(:recipe, :steps_attributes)
+      if raw_steps.is_a?(String)
         begin
-          parsed = JSON.parse(params[:recipe][:steps_attributes])
-          @recipe.steps_attributes = parsed
+          parsed = JSON.parse(raw_steps)
+          # [{step_number: 1, instruction: "..."}, ...] 形式を想定
+          @recipe.assign_attributes(steps_attributes: parsed)
         rescue JSON::ParserError => e
-          Rails.logger.error "JSON parse error in steps_attributes: #{e.message}"
-          return render json: { error: "Invalid JSON format for steps_attributes" }, status: :unprocessable_entity
+          Rails.logger.error "Invalid JSON for steps_attributes: #{e.message}"
+          return render json: { errors: ['手順の形式が不正です（JSON）'] }, status: :unprocessable_entity
         end
       end
-  
-      # 3) 画像添付（multipart）
-      @recipe.image.attach(params[:image]) if params[:image].present?
-  
-      # 4) タグ名の配列を受け取り、Tag モデルに紐づけ（ココが新規追加）
-      tag_names = Array(params.dig(:recipe, :tag_names)).map(&:to_s).reject(&:blank?)
-      if tag_names.present?
-        tags = tag_names.map { |name| Tag.find_or_create_by!(name: name) }
-        @recipe.tags = tags
+
+      # 3) 画像は recipe の外で image パラメータとして来る ⇒ attach
+      if params[:image].present?
+        @recipe.image.attach(params[:image])
       end
-  
+
+      # 4) タグ名の配列 recipe[tag_names] を受け取り、Tag を紐付け
+      tag_names = Array(params.dig(:recipe, :tag_names)).map(&:to_s).map(&:strip).reject(&:blank?)
+      if tag_names.present?
+        @recipe.tags = tag_names.uniq.map { |name| Tag.find_or_create_by!(name:) }
+      end
+
       if @recipe.save
         host = Rails.env.production? ? "https://back-main.fly.dev" : "http://localhost:3000"
         render json: {
           id:           @recipe.id,
           title:        @recipe.title,
           description:  @recipe.description,
-          price:        @recipe.price,
           cooking_time: @recipe.cooking_time,
-          category:     @recipe.category&.name,          # ← カテゴリ名
-          tags:         @recipe.tags.pluck(:name),       # ← タグ名配列
+          price:        @recipe.price,
+          category:     @recipe.category&.name,
+          tags:         @recipe.tags.pluck(:name),
           image_url:    (@recipe.image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(@recipe.image, host:) : nil),
           steps:        @recipe.steps.order(:step_number).map { |s| { step_number: s.step_number, instruction: s.instruction } },
           ingredients:  @recipe.recipe_ingredients.includes(:ingredient).map { |ri|
-                          { id: ri.ingredient_id, name: ri.ingredient.name, protein: ri.ingredient.protein,
-                            carbohydrate: ri.ingredient.carbohydrate, fat: ri.ingredient.fat, quantity: ri.quantity }
+                          {
+                            id:            ri.ingredient_id,
+                            name:          ri.ingredient.name,
+                            protein:       ri.ingredient.protein,
+                            carbohydrate:  ri.ingredient.carbohydrate,
+                            fat:           ri.ingredient.fat,
+                            quantity:      ri.quantity
+                          }
                         }
         }, status: :created
       else
+        # 422で返す（500にしない）
         Rails.logger.error "Recipe save failed: #{@recipe.errors.full_messages}"
         render json: { errors: @recipe.errors.full_messages }, status: :unprocessable_entity
       end
     end
+
   
     private
   
@@ -159,6 +170,7 @@ end
     def recipe_params
       params.require(:recipe).permit(
         :title, :description, :user_id, :category_id, :cooking_time, :price,
+        # :image は multipart 直下の image を使うためここでは許可しない（attachで処理）
         recipe_ingredients_attributes: [:ingredient_id, :quantity],
         steps_attributes: [:step_number, :instruction]
       )

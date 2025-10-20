@@ -2,13 +2,15 @@ ja:
   activerecord:
     attributes:
       ingredient:
-        ingredient: 材料
+        ingredient: "材料"
+
     errors:
       models:
         ingredient:
           attributes:
             ingredient:
               required: "を入力してください"
+
         recipe:
           attributes:
             user:
@@ -23,3 +25,14 @@ ja:
             price:
               blank: "価格を入力してください"
               not_a_number: "価格は数値で入力してください"
+
+        recipe_ingredient:
+          attributes:
+            quantity:
+              greater_than: "%{count}より大きい値にしてください"
+              not_a_number: "は数値で入力してください"
+              only_integer: "は整数で入力してください"
+
+  errors:
+    messages:
+      greater_than: "%{count}より大きい値にしてください"
