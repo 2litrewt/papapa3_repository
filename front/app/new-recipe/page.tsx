@@ -17,27 +17,34 @@ export default function NewRecipe() {
   const [instructions, setInstructions] = useState<string[]>([""]);
   const [image, setImage] = useState<File | null>(null);
   const [userId, setUserId] = useState<number>();
-  const [categoryId, setCategoryId] = useState<number>(1);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  type Category = { id: number; name: string };
+  const [categories, setCategories] = useState<Category[]>([]);
   const [cookingTime, setCookingTime] = useState<number>(30);
   const [price, setPrice] = useState<number>(1000);
   const [message, setMessage] = useState("");
   const [ingredientFields, setIngredientFields] = useState<IngredientInput[]>([]);
 
-  /**
-   * カテゴリ一覧とタグ一覧。ルートページで使用していた定義を
-   * 新規投稿フォームでも利用できるようにここに定義します。
-   * カテゴリは一つだけ選択可能で、タグは最大10個まで選択可能です。
-   */
-  const categoriesList: string[] = [
-    "ご飯",
-    "麺",
-    "煮物",
-    "焼き物",
-    "揚げ物",
-    "サラダ",
-    "スープ",
-    "デザート",
-  ];
+useEffect(() => {
+    (async () => {
+      try {
+        // ※ バックエンドのベースURLに合わせる（例：https://back-main.fly.dev/api など）
+        // ここでは既存実装に合わせ `${NEXT_PUBLIC_API_URL}/categories` を叩く
+        const res = await axios.get<{ id: number; name: string }[]>(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/categories`,
+          { headers: { "Cache-Control": "no-store" } }
+        );
+        setCategories(res.data);
+        // デフォルト選択：最初のカテゴリIDを自動選択（未選択を避ける）
+        if (res.data.length > 0 && categoryId == null) {
+          setCategoryId(res.data[0].id);
+        }
+      } catch (e) {
+        console.error("カテゴリ取得に失敗しました", e);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tagsList: string[] = [
     "冷たい",
@@ -142,6 +149,11 @@ export default function NewRecipe() {
   // フォーム送信時の処理
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (categoryId == null) {
+            setMessage("カテゴリの取得に失敗しました。ページを再読み込みしてお試しください。");
+            return;
+          }
+      
     const formData = new FormData();
     const stepsData = instructions.map((instruction, index) => ({
       step_number: index + 1,
@@ -160,7 +172,7 @@ export default function NewRecipe() {
 
   console.log("🍱 材料送信内容:", validFields);
     
-    formData.append("recipe[title]", title);
+    formData.append("recipe[category_id]", String(categoryId));
     validFields.forEach((field, index) => {
       formData.append(`recipe[recipe_ingredients_attributes][${index}][ingredient_id]`, String(field.ingredient_id));
       formData.append(`recipe[recipe_ingredients_attributes][${index}][quantity]`, String(field.quantity));
@@ -284,15 +296,22 @@ export default function NewRecipe() {
             <div>
               <label className="block mb-1">カテゴリ</label>
               <select
-                value={categoryId}
+                value={categoryId ?? ""}
                 onChange={(e) => setCategoryId(Number(e.target.value))}
                 className="w-full border border-black p-2 rounded"
               >
-                {categoriesList.map((cat, idx) => (
-                  <option value={idx + 1} key={cat}>
-                    {cat}
+                {/* ✅ 取得できるまでプレースホルダ表示 */}
+                {categories.length === 0 && (
+                  <option value="" disabled>
+                    カテゴリを読み込み中…
+                  </option>
+                )}
+                {categories.map((cat) => (
+                  <option value={cat.id} key={cat.id}>
+                    {cat.name}
                   </option>
                 ))}
+
               </select>
             </div>
 
