@@ -31,7 +31,7 @@ useEffect(() => {
         // ※ バックエンドのベースURLに合わせる（例：https://back-main.fly.dev/api など）
         // ここでは既存実装に合わせ `${NEXT_PUBLIC_API_URL}/categories` を叩く
         const res = await axios.get<{ id: number; name: string }[]>(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/categories`,
+          `/api/categories`,
           { headers: { "Cache-Control": "no-store" } }
         );
         setCategories(res.data);
@@ -153,13 +153,16 @@ useEffect(() => {
             setMessage("カテゴリの取得に失敗しました。ページを再読み込みしてお試しください。");
             return;
           }
+    if (!title || title.trim().length === 0) {
+      setMessage("タイトルを入力してください");
+      return;
+    }      
       
     const formData = new FormData();
     const stepsData = instructions.map((instruction, index) => ({
       step_number: index + 1,
       instruction: instruction
     }));
-
     const validFields = ingredientFields
   .filter((f) => f.ingredientId !== null && f.quantity !== null)
   .map((f) => ({
@@ -169,9 +172,9 @@ useEffect(() => {
 
   console.log("🧪 ingredientFields の中身:", ingredientFields);
   console.log("🍱 validFields に変換されたもの:", validFields);
-
   console.log("🍱 材料送信内容:", validFields);
-    
+
+    formData.append("recipe[title]", title.trim());
     formData.append("recipe[category_id]", String(categoryId));
     validFields.forEach((field, index) => {
       formData.append(`recipe[recipe_ingredients_attributes][${index}][ingredient_id]`, String(field.ingredient_id));
@@ -200,7 +203,7 @@ useEffect(() => {
 
     try {
       console.log("🚀 API リクエストを送信します...");
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recipes`, formData, {
+      const response = await axios.post(`/api/recipes`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setMessage("レシピが正常にアップロードされました！");

@@ -5,10 +5,12 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev"}/api/:path*`,
       },
     ];
   },
+
+  
 
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev",
@@ -18,7 +20,7 @@ const nextConfig = {
   },
 
   images: {
-    domains: ['localhost'], 
+    domains: ['localhost','back-main.fly.dev'],
     formats:['image/avif', 'image/webp'],
     remotePatterns: [
       {
@@ -27,6 +29,11 @@ const nextConfig = {
         port: "3000",
         pathname: "/images/**",
       },
+      {
+        protocol: "https",
+        hostname: "back-main.fly.dev",
+        pathname: "/**",
+      }
     ],
   },
   
