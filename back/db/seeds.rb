@@ -1,5 +1,10 @@
 # db/seeds.rb
 
+if Rails.env.test?
+  puts "[seeds] RAILS_ENV=test のためシードはスキップします"
+  return
+end
+
 # ユーザーを作成（デモ用）
 user = User.first || User.create!(name: "デモユーザー", email: "demo@example.com", password: "password")
 
