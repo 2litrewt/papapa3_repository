@@ -2,19 +2,16 @@
 const nextConfig = {
 
   async rewrites() {
+    const api = process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev";
     return [
-      {
-        source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev"}/api/:path*`,
-      },
+      { source: "/api/:path*", destination: `${api}/api/:path*` },
     ];
   },
-
-  
 
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev",
   },
+  
   eslint: {
     ignoreDuringBuilds: true, // ✅ `yarn build` で ESLint のエラーを無視
   },
