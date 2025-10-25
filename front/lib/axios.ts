@@ -5,7 +5,9 @@ const isServer = typeof window === "undefined";
 // axiosのクライアント作成
 const apiClient = axios.create({
   baseURL: isServer
-  ? (process.env.NEXT_PUBLIC_API_URL ?? "https://back-main.fly.dev")
+  ? (process.env.NODE_ENV === "development"
+      ? "http://back:3000"
+      : "https://back-main.fly.dev")
   : "",
   withCredentials: true,
   headers: {
