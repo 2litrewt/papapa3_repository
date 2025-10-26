@@ -5,9 +5,10 @@ const nextConfig = {
     const api = 
       process.env.NODE_ENV === "development"
     ? "http://back:3000"  : (process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev");
-    
+
     return [
       { source: "/api/:path*", destination: `${api}/api/:path*` },
+      
     ];
   },
 
