@@ -7,8 +7,12 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
     # 認証（/api/auth/**）
     mount_devise_token_auth_for 'User', at: 'auth'
+  end
 
-    # バージョン付き（現状維持）
+  scope defaults: { format: :json } do
+    mount_devise_token_auth_for 'User', at: 'auth', as: 'user_auth_compat'
+  end
+    
     namespace :v1 do
       resources :ingredients, only: [:index]
     end
