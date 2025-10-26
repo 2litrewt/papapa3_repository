@@ -61,10 +61,9 @@ end
     end
     
     def show
-      Current.user = current_user
       recipe = Recipe.includes(:recipe_ingredients, :ingredients, :category, :user, :steps).find_by(id: params[:id])
 
-      fav = current_user&.favorites&.find_by(recipe_id: recipe.id)
+      fav = current_api_user&.favorites&.find_by(recipe_id: recipe.id)
 
     
       if recipe
