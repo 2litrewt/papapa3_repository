@@ -1,7 +1,6 @@
 module Api
   class RecipesController < ApplicationController
 
-    skip_before_action :authenticate_user!,     only: [:index, :show], raise: false
     skip_before_action :authenticate_api_user!, only: [:index, :show], raise: false
 
     def index
@@ -62,6 +61,11 @@ end
     
     def show
       recipe = Recipe.includes(:recipe_ingredients, :ingredients, :category, :user, :steps).find_by(id: params[:id])
+
+      unless recipe
+        render json: { error: 'Recipe not found' }, status: :not_found
+        return
+      end
 
       fav = current_api_user&.favorites&.find_by(recipe_id: recipe.id)
 
