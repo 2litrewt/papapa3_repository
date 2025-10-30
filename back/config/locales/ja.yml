@@ -33,6 +33,11 @@ ja:
               not_a_number: "は数値で入力してください"
               only_integer: "は整数で入力してください"
 
+        user:
+          attributes:
+            name:
+              blank: "名前を入力してください"
+
   errors:
     messages:
       greater_than: "%{count}より大きい値にしてください"

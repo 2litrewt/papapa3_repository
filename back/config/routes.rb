@@ -1,41 +1,29 @@
 # config/routes.rb
 Rails.application.routes.draw do
-  # ヘルスチェック
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # API エンドポイント
+  # 認証の互換ルート（/api/auth/** を提供）
   namespace :api, defaults: { format: :json } do
-    # 認証（/api/auth/**）
-    mount_devise_token_auth_for 'User', at: 'auth'
-  end
+    mount_devise_token_auth_for 'User', at: 'auth', as: 'api_user_auth'
 
-  scope defaults: { format: :json } do
-    mount_devise_token_auth_for 'User', at: 'auth', as: 'user_auth_compat'
-  end
-    
+    # 業務APIは /api/** 配下に統一
     namespace :v1 do
       resources :ingredients, only: [:index]
     end
-
     resources :posts, only: [:index]
-
-    # recipes：REST標準 + /api/recipes/search
     resources :recipes, only: [:index, :show, :create] do
-      collection do
-        get :search
-      end
+      collection { get :search }
     end
-
     resources :favorites,  only: [:index, :create, :destroy]
     resources :categories, only: [:index]
     resources :ingredients, only: [:index]
     resources :tags,       only: [:index]
   end
 
-  # ルート
-  root to: proc { [200, {}, ['Rails API is running']] }
+  # 認証の“正式”ルート（/auth/**）
+  scope defaults: { format: :json } do
+    mount_devise_token_auth_for 'User', at: 'auth', as: 'user_auth_compat'
+  end
 
-  # （任意）フロント直アクセス用の別名ルートは混乱を招きがちなので一旦無効化
-  # resources :recipes, only: [:index, :create], controller: 'api/recipes'
-  # resources :posts,   only: [:index]
+  root to: proc { [200, {}, ['Rails API is running']] }
 end
