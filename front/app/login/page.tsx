@@ -22,7 +22,7 @@ export default function Login() {
 
     try {
       const res = await apiClient.post(
-        "/auth/sign_in",      // 正しいログインパス
+        "auth/sign_in",      // 正しいログインパス
         { email, password },  // ボディはここに渡す
         { withCredentials: true }
       );

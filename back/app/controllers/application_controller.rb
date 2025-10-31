@@ -1,11 +1,11 @@
+# app/controllers/application_controller.rb
 class ApplicationController < ActionController::API
   include DeviseTokenAuth::Concerns::SetUserByToken
+  include Devise::Controllers::Helpers
 
-  before_action :configure_permitted_parameters, if: :devise_controller?
-
-  protected
-
-  def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
+  private
+  def set_current_user
+    Current.user = current_api_api_user_auth
   end
+
 end

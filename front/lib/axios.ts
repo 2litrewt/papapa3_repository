@@ -1,8 +1,14 @@
 import axios from "axios";
 
+const isServer = typeof window === "undefined";
+
 // axiosのクライアント作成
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: isServer
+  ? (process.env.NODE_ENV === "development"
+      ? "http://back:3000"
+      : (process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev"))
+      : (process.env.NEXT_PUBLIC_API_URL || "https://back-main.fly.dev"),
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

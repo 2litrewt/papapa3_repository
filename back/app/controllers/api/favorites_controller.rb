@@ -1,18 +1,18 @@
 module Api
   class FavoritesController < ApplicationController
-    before_action :authenticate_user!
+    before_action :authenticate_api_api_user_auth!
 
     def index
-      favorites = current_user.favorites
+      favorites = current_api_api_user_auth.favorites
       render json: favorites
     end
 
     def create
-      favorite = current_user.favorites.new(favorite_params)
-      if favorite.save
-        render json: favorite, status: :created
+      favorites = current_api_api_user_auth.favorites.new(favorite_params)
+      if favorites.save
+        render json: favorites, status: :created
       else
-        render json: { errors: favorite.errors.full_messages }, status: :unprocessable_entity
+        render json: { errors: favorites.errors.full_messages }, status: :unprocessable_entity
       end
 
     rescue => e
@@ -23,9 +23,9 @@ module Api
     end
 
     def destroy
-      favorite = current_user.favorites.find_by(id: params[:id])
-      if favorite
-        favorite.destroy
+      favorites = current_api_api_user_auth.favorites.find_by(id: params[:id])
+      if favorites
+        favorites.destroy
         head :no_content
       else
         render json: { error: "お気に入りが見つかりません" }, status: :not_found
