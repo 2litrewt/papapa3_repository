@@ -1,7 +1,7 @@
 module Api
   class RecipesController < ApplicationController
 
-    skip_before_action :authenticate_api_user!, only: [:index, :show], raise: false
+    skip_before_action :authenticate_api_api_user_auth!, only: [:index, :show], raise: false
 
     def index
       keyword = params[:keyword]
@@ -67,7 +67,9 @@ end
         return
       end
 
-      fav = current_api_user&.favorites&.find_by(recipe_id: recipe.id)
+      user = current_api_api_user_auth
+      fav = user&.favorites&.find_by(recipe_id: recipe.id)
+
 
     
       if recipe

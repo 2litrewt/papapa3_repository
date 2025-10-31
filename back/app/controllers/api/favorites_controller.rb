@@ -1,14 +1,14 @@
 module Api
   class FavoritesController < ApplicationController
-    before_action :authenticate_api_user!
+    before_action :authenticate_api_api_user_auth!
 
     def index
-      favorites = current_api_user.favorites
+      favorites = current_api_api_user_auth.favorites
       render json: favorites
     end
 
     def create
-      favorite = current_api_user.favorites.new(favorite_params)
+      favorite = current_api_api_user_auth.favorites.new(favorite_params)
       if favorite.save
         render json: favorite, status: :created
       else
@@ -23,7 +23,7 @@ module Api
     end
 
     def destroy
-      favorite = current_api_user.favorites.find_by(id: params[:id])
+      favorites = current_api_api_user_auth.favorites.find_by(id: params[:id])
       if favorite
         favorite.destroy
         head :no_content

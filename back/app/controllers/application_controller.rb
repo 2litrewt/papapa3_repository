@@ -5,7 +5,7 @@ class ApplicationController < ActionController::API
 
   private
   def set_current_user
-    Current.user = current_api_user
+    Current.user = current_api_api_user_auth
   end
 
 end
